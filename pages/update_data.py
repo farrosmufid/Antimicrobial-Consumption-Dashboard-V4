@@ -80,18 +80,6 @@ def read_and_concat_orders_file():
         print("one month of order cleaning file end")
     
     
-
-# Execute read_and_concat_orders_file()
-
-# if os.path.exists('./orders_data_dump'):
-#     path = './orders_data_dump'
-#     extension = '.csv'
-#     files = [file for file in os.listdir(path) if file.endswith(extension)]
-
-#     # If there are more than 1 files
-#     if len(files) >= 1:
-#         read_and_concat_orders_file()
-
 def read_and_concat_resistance_file():
     path = './resistance_data_dump'
     extension = '.csv'
@@ -817,6 +805,13 @@ def update_refresh_order_data(list_of_contents):
     display_style = {"display": "none"}
 
     if "refresh-order-data-button-update-data-page" == ctx.triggered_id:
+
+        # Automate delete clean.csv process
+        file_path = './orders_data_clean/clean.csv'
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
         read_and_concat_orders_file()
         is_open = True
         display_style = {"display": "block"}
@@ -866,21 +861,6 @@ def update_refresh_susceptibility_data(list_of_contents):
 )
 
 def update_ao_month_year_table_from_upload(data, refresh_n_clicks, pathname):
-
-    # # Check if clean exist
-    # clean_file_exist = os.path.exists('./orders_data_clean/clean.csv')
-
-    # if clean_file_exist:
-    #     if data == "dataset-uploaded" or ctx.triggered_id == 'refresh-order-data-button-update-data-page' or pathname == '/':
-    #         clean_df = pd.read_csv('./orders_data_clean/clean.csv')
-    #         clean_df["ORDER_PLACED_DATE"] = pd.to_datetime(clean_df["ORDER_PLACED_DATE"], format = '%d/%m/%Y %H:%M')
-    #         clean_df['ORDER_MONTH_YEAR'] = clean_df['ORDER_PLACED_DATE'].dt.strftime('%Y-%m')
-    #         unique_month_years = sorted(clean_df['ORDER_MONTH_YEAR'].dropna().unique())
-    #         unique_month_year_formatted = [pd.to_datetime(date).strftime('%B %Y') for date in unique_month_years]
-            
-    #         new_data = [{'ORDER_MONTH_YEAR': date} for date in unique_month_year_formatted]
-        
-    #         return new_data
 
     path = './orders_data_dump'
     extension = '.csv'
