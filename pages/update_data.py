@@ -439,18 +439,32 @@ def parse_resistance_contents(contents, filename, date):
 
 ## -- START LAYOUT INITIALISATION VARIABLES --
 
-clean_file_exist = os.path.exists('./orders_data_clean/clean.csv')
+path = './orders_data_dump'
+extension = '.csv'
 
-if clean_file_exist:
-    clean_df = pd.read_csv('./orders_data_clean/clean.csv')
-    clean_df["ORDER_PLACED_DATE"] = pd.to_datetime(clean_df["ORDER_PLACED_DATE"], format = '%d/%m/%Y %H:%M')
-    clean_df['ORDER_MONTH_YEAR'] = clean_df['ORDER_PLACED_DATE'].dt.strftime('%Y-%m')
-    unique_month_years = sorted(clean_df['ORDER_MONTH_YEAR'].dropna().unique())
-    unique_month_year_formatted = [pd.to_datetime(date).strftime('%B %Y') for date in unique_month_years]
+files = [file for file in os.listdir(path) if file.endswith(extension)]
+
+# Check if not empty
+if len(files) > 0:
+    file_month_year = []
+
+    for file in files:
+        df = pd.read_csv(os.path.join(path, file))
+        df = cleaning(df)
+        df['ORDER_PLACED_DATE'] = pd.to_datetime(df['ORDER_PLACED_DATE'], format = '%d/%m/%Y %H:%M')
+        df['ORDER_MONTH_YEAR'] = df['ORDER_PLACED_DATE'].dt.strftime('%Y-%m')
+        unique_month_years = sorted(df['ORDER_MONTH_YEAR'].dropna().unique())
+
+        for unique_month_year in unique_month_years:
+            file_month_year.append(unique_month_year)
+
+    file_month_year = sorted(set(file_month_year))
+
+    file_month_year_formatted = [pd.to_datetime(date).strftime('%B %Y') for date in file_month_year]
 
     ao_month_year_table = dash_table.DataTable(
         columns = [{"name": 'Order Month Year', "id": 'ORDER_MONTH_YEAR'}],
-        data = [{'ORDER_MONTH_YEAR': date} for date in unique_month_year_formatted],
+        data = [{'ORDER_MONTH_YEAR': date} for date in file_month_year_formatted],
         page_action = "native",
         page_current = 0,
         page_size = 5,
@@ -461,7 +475,6 @@ if clean_file_exist:
         },
         id = 'ao-month-year-table-update-data-page'
     )
-
 else:
     ao_month_year_table = dash_table.DataTable(
         columns = [{"name": 'Order Month Year', "id": 'ORDER_MONTH_YEAR'}],
@@ -854,20 +867,49 @@ def update_refresh_susceptibility_data(list_of_contents):
 
 def update_ao_month_year_table_from_upload(data, refresh_n_clicks, pathname):
 
-    # Check if clean exist
-    clean_file_exist = os.path.exists('./orders_data_clean/clean.csv')
+    # # Check if clean exist
+    # clean_file_exist = os.path.exists('./orders_data_clean/clean.csv')
 
-    if clean_file_exist:
-        if data == "dataset-uploaded" or ctx.triggered_id == 'refresh-order-data-button-update-data-page' or pathname == '/':
-            clean_df = pd.read_csv('./orders_data_clean/clean.csv')
-            clean_df["ORDER_PLACED_DATE"] = pd.to_datetime(clean_df["ORDER_PLACED_DATE"], format = '%d/%m/%Y %H:%M')
-            clean_df['ORDER_MONTH_YEAR'] = clean_df['ORDER_PLACED_DATE'].dt.strftime('%Y-%m')
-            unique_month_years = sorted(clean_df['ORDER_MONTH_YEAR'].dropna().unique())
-            unique_month_year_formatted = [pd.to_datetime(date).strftime('%B %Y') for date in unique_month_years]
+    # if clean_file_exist:
+    #     if data == "dataset-uploaded" or ctx.triggered_id == 'refresh-order-data-button-update-data-page' or pathname == '/':
+    #         clean_df = pd.read_csv('./orders_data_clean/clean.csv')
+    #         clean_df["ORDER_PLACED_DATE"] = pd.to_datetime(clean_df["ORDER_PLACED_DATE"], format = '%d/%m/%Y %H:%M')
+    #         clean_df['ORDER_MONTH_YEAR'] = clean_df['ORDER_PLACED_DATE'].dt.strftime('%Y-%m')
+    #         unique_month_years = sorted(clean_df['ORDER_MONTH_YEAR'].dropna().unique())
+    #         unique_month_year_formatted = [pd.to_datetime(date).strftime('%B %Y') for date in unique_month_years]
             
-            new_data = [{'ORDER_MONTH_YEAR': date} for date in unique_month_year_formatted]
+    #         new_data = [{'ORDER_MONTH_YEAR': date} for date in unique_month_year_formatted]
         
+    #         return new_data
+
+    path = './orders_data_dump'
+    extension = '.csv'
+
+    files = [file for file in os.listdir(path) if file.endswith(extension)]
+
+    # Check if not empty
+    if len(files) > 0:
+        if data == "dataset-uploaded" or ctx.triggered_id == 'refresh-order-data-button-update-data-page' or pathname == '/':
+            file_month_year = []
+
+            for file in files:
+                df = pd.read_csv(os.path.join(path, file))
+                df = cleaning(df)
+                df['ORDER_PLACED_DATE'] = pd.to_datetime(df['ORDER_PLACED_DATE'], format = '%d/%m/%Y %H:%M')
+                df['ORDER_MONTH_YEAR'] = df['ORDER_PLACED_DATE'].dt.strftime('%Y-%m')
+                unique_month_years = sorted(df['ORDER_MONTH_YEAR'].dropna().unique())
+
+                for unique_month_year in unique_month_years:
+                    file_month_year.append(unique_month_year)
+                
+            file_month_year = sorted(set(file_month_year))
+
+            file_month_year_formatted = [pd.to_datetime(date).strftime('%B %Y') for date in file_month_year]
+
+            new_data = [{'ORDER_MONTH_YEAR': date} for date in file_month_year_formatted]
+
             return new_data
+
 
 # Callback to check if susceptibility dataset is uploaded, refreshed is clicked, or if we are in the home page
 #  then update the table for susceptibility
