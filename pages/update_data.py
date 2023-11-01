@@ -477,42 +477,57 @@ else:
         id = 'ao-month-year-table-update-data-page'
     )
 
-resistance_file_exist = os.path.exists('./resistance_data_clean/resistance_df.csv')
 
-if resistance_file_exist:
-    resistance_df = pd.read_csv('./resistance_data_clean/resistance_df.csv')
-    resistance_df['COLLECT_DT_TM'] = pd.to_datetime(resistance_df['COLLECT_DT_TM'], format = '%d/%m/%Y %H:%M')
-    resistance_df['SUSCEPTIBILITY_MONTH_YEAR'] = resistance_df['COLLECT_DT_TM'].dt.strftime('%Y-%m')
-    unique_month_years = sorted(resistance_df['SUSCEPTIBILITY_MONTH_YEAR'].dropna().unique())
-    unique_month_year_formatted = [pd.to_datetime(date).strftime('%B %Y') for date in unique_month_years]
+path = './resistance_data_dump'
+extension = '.csv'
 
-    susceptibility_month_year_table = dash_table.DataTable(
-        columns = [{"name": 'Susceptibility Month Year', "id": 'SUSCEPTIBILITY_MONTH_YEAR'}],
-        data = [{'SUSCEPTIBILITY_MONTH_YEAR': date} for date in unique_month_year_formatted],
+files = [file for file in os.listdir(path) if file.endswith(extension)]
+
+# Check if not empty
+if len(files) > 0:
+    file_date_list = []
+
+    for file in files:
+        df = pd.read_csv(os.path.join(path, file))
+        df['COLLECT_DT_TM'] = pd.to_datetime(df['COLLECT_DT_TM'], format = '%d/%m/%Y %H:%M').dt.date # convert to datetime format
+        min_date = min(df['COLLECT_DT_TM'])
+        max_date = max(df['COLLECT_DT_TM'])
+
+        # Convert to string
+        min_date_str = min_date.strftime('%B %d, %Y')
+        max_date_str = max_date.strftime('%B %d, %Y')
+    
+        file_date = [min_date_str, max_date_str]
+
+        file_date_list.append(file_date)
+
+    susceptibility_min_max_date_table = dash_table.DataTable(
+        columns = [{"name": 'Minimum Date', "id": "MINIMUM_DATE"}, {"name": "Maximum Date", "id": "MAXIMUM_DATE"}],
+        data = [{"MINIMUM_DATE": file_date[0], "MAXIMUM_DATE": file_date[1]} for file_date in file_date_list ],
         page_action = "native",
         page_current = 0,
         page_size = 5,
-        style_cell = {'textAlign': 'left','font-family': 'Helvetica Neue', 'fontSize': 14},
+        style_cell = {'textAlign': 'left', 'font-family': 'Helvetica Neue', 'fontSize': 14},
         style_header = {
             'backgroundColor': 'rgb(173,216,230)',
             'fontWeight': 'bold'
         },
-        id = 'susceptibility-month-year-table-update-data-page'
+        id = 'susceptibility-min-max-date-table-update-data-page'
     )
-
 else:
-    susceptibility_month_year_table = dash_table.DataTable(
-        columns = [{"name": 'Susceptibility Month Year', "id": 'SUSCEPTIBILITY_MONTH_YEAR'}],
+    # files is empty
+    susceptibility_min_max_date_table = dash_table.DataTable(
+        columns = [{"name": 'Minimum Date', "id": "MINIMUM_DATE"}, {"name": "Maximum Date", "id": "MAXIMUM_DATE"}],
         data = [], # Empty data
         page_action = "native",
         page_current = 0,
         page_size = 5,
-        style_cell = {'textAlign': 'left','font-family': 'Helvetica Neue', 'fontSize': 14},
+        style_cell = {'textAlign': 'left', 'font-family': 'Helvetica Neue', 'fontSize': 14},
         style_header = {
             'backgroundColor': 'rgb(173,216,230)',
             'fontWeight': 'bold'
         },
-        id = 'susceptibility-month-year-table-update-data-page'
+        id = 'susceptibility-min-max-date-table-update-data-page'
     )
 
 ## -- END LAYOUT INITIALISATION VARIABLES --
@@ -658,7 +673,7 @@ layout = html.Div([
     html.Br(),
     html.Label("Uploaded Susceptibility Data Records:"),
     html.Br(),
-    susceptibility_month_year_table,
+    susceptibility_min_max_date_table,
 
     # Susceptibility data refresh text
     html.Div([
@@ -858,7 +873,7 @@ def update_ao_month_year_table_from_upload(data, refresh_n_clicks, pathname):
 #  then update the table for susceptibility
 
 @callback(
-    Output('susceptibility-month-year-table-update-data-page', 'data'),
+    Output('susceptibility-min-max-date-table-update-data-page', 'data'),
     Input('memory2', 'data'),
     Input('refresh-susceptibility-data-button-update-data-page', 'n_clicks'),
     Input('url', 'pathname')    
@@ -866,12 +881,34 @@ def update_ao_month_year_table_from_upload(data, refresh_n_clicks, pathname):
 
 def update_susceptibility_month_year_table_from_upload(data, refresh_n_clicks, pathname):
     if data == "dataset-uploaded" or ctx.triggered_id == 'refresh-susceptibility-data-button-update-data-page' or pathname == '/':
-        resistance_df = pd.read_csv('./resistance_data_clean/resistance_df.csv')
-        resistance_df['COLLECT_DT_TM'] = pd.to_datetime(resistance_df['COLLECT_DT_TM'], format = '%d/%m/%Y %H:%M')
-        resistance_df['SUSCEPTIBILITY_MONTH_YEAR'] = resistance_df['COLLECT_DT_TM'].dt.strftime('%Y-%m')
-        unique_month_years = sorted(resistance_df['SUSCEPTIBILITY_MONTH_YEAR'].dropna().unique())
-        unique_month_year_formatted = [pd.to_datetime(date).strftime('%B %Y') for date in unique_month_years]
+     
+        path = './resistance_data_dump'
+        extension = '.csv'
 
-        new_data = [{'SUSCEPTIBILITY_MONTH_YEAR': date} for date in unique_month_year_formatted]
+        files = [file for file in os.listdir(path) if file.endswith(extension)]
+
+        # Base case: new_data is empty
+        new_data = []
+
+        # Check if not empty
+        if len(files) > 0:
+
+            file_date_list = []
+
+            for file in files:
+                df = pd.read_csv(os.path.join(path, file))
+                df['COLLECT_DT_TM'] = pd.to_datetime(df['COLLECT_DT_TM'], format = '%d/%m/%Y %H:%M').dt.date # convert to datetime format
+                min_date = min(df['COLLECT_DT_TM'])
+                max_date = max(df['COLLECT_DT_TM'])
+
+                # Convert to string
+                min_date_str = min_date.strftime('%B %d, %Y')
+                max_date_str = max_date.strftime('%B %d, %Y')
+            
+                file_date = [min_date_str, max_date_str]
+
+                file_date_list.append(file_date)
+        
+            new_data = [{"MINIMUM_DATE": file_date[0], "MAXIMUM_DATE": file_date[1]} for file_date in file_date_list]
 
         return new_data
