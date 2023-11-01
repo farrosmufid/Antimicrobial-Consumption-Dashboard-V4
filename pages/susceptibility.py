@@ -70,8 +70,27 @@ def read_and_transform_resistance_data_model():
     df['ORDERABLE'] = np.where(condition, replacement, df['ORDERABLE'])
     df = df.drop_duplicates(keep='first')
 
-    df.fillna({'MRN': -1,'ACCESSION': -1,'DATE_OF_BIRTH': -1,'ANTIBIOTIC': -1, 'ORGANISM_NAME': -1, 'ORDERABLE': -1, 'NURSE_LOC': -1, 'ADMITTING_MO': -1, 'MED_SERVICE': -1}, inplace=True)
     print("finished cleaning ...")
+
+    print("start pivot ...")
+
+    pivot_df = df.pivot_table(index=['MRN','DATE_OF_BIRTH','ACCESSION','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
+
+    # Reset the index if you want 'MRN' and 'ORGANISM_NAME' to be regular columns
+    pivot_df.reset_index(inplace=True)
+
+    # Replace NaN values with an empty string or any other desired value
+    pivot_df.fillna('', inplace=True)
+
+    # Optional: Rename the columns to remove the name of the index (i.e., 'ANTIBIOTIC')
+    pivot_df.columns.name = None
+
+    pivot_df.to_csv("./resistance_data_clean/susceptibility_download.csv", index = False)
+
+    print("finished pivot ...")
+
+    df.fillna({'MRN': -1,'ACCESSION': -1,'DATE_OF_BIRTH': -1,'ANTIBIOTIC': -1, 'ORGANISM_NAME': -1, 'ORDERABLE': -1, 'NURSE_LOC': -1, 'ADMITTING_MO': -1, 'MED_SERVICE': -1}, inplace=True)
+    
 
     print("start summing the subsceptible, resistance, and intermediate count ...")
     # Sum the subsceptible, resistance, intermediate count
