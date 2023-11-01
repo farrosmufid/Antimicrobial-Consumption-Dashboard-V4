@@ -491,8 +491,8 @@ if len(files) > 0:
     for file in files:
         df = pd.read_csv(os.path.join(path, file))
         df['COLLECT_DT_TM'] = pd.to_datetime(df['COLLECT_DT_TM'], format = '%d/%m/%Y %H:%M').dt.date # convert to datetime format
-        min_date = min(df['COLLECT_DT_TM'])
-        max_date = max(df['COLLECT_DT_TM'])
+        min_date = df['COLLECT_DT_TM'].dropna().min()
+        max_date = df['COLLECT_DT_TM'].dropna().max()
 
         # Convert to string
         min_date_str = min_date.strftime('%B %d, %Y')
@@ -920,8 +920,8 @@ def update_susceptibility_month_year_table_from_upload(data, refresh_n_clicks, p
             for file in files:
                 df = pd.read_csv(os.path.join(path, file))
                 df['COLLECT_DT_TM'] = pd.to_datetime(df['COLLECT_DT_TM'], format = '%d/%m/%Y %H:%M').dt.date # convert to datetime format
-                min_date = min(df['COLLECT_DT_TM'])
-                max_date = max(df['COLLECT_DT_TM'])
+                min_date = df['COLLECT_DT_TM'].dropna().min()
+                max_date = df['COLLECT_DT_TM'].dropna().max()
 
                 # Convert to string
                 min_date_str = min_date.strftime('%B %d, %Y')
