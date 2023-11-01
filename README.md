@@ -1,6 +1,6 @@
 # Antimicrobial Consumption Dashboard V4
 
-<img width="1510" alt="Update_data_page" src="https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/31735132/ee048f4f-b753-4e41-813c-f476eb62bdcf">
+<img width="1507" alt="Screenshot 2023-11-01 at 11 45 25 pm" src="https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/31735132/21721915-05c1-41ae-ace2-4b9838a25503">
 
 ## Installation:
 1. Install Python 3.10 [Install Python 3.10](https://www.python.org/downloads/release/python-3100/).
