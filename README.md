@@ -11,7 +11,7 @@
 ## Prerequisites (How to run the dashboard):
 
 
-### 1. Orders Data
+### 1. Antibiotic Orders Data
 
 1. To make it work, ensure that `final_df.csv` is located in the `orders_data_clean` folder.
 2. Ensure that there's at least one month of data in the `orders_data_dump` folder. You can add or delete contents from the `orders_data_dump` folder, that folder is for the raw data that hasn't been transformed.
@@ -24,7 +24,7 @@
 9. If you want to append data, there is no need to delete `clean.csv`. You can use the update_data section to add more data. There, you can upload multiple new files.
 10. Another way to add data is to directly place it in the `orders_data_dump` folder and click "refresh order data".
 
-### 2. Resistance Data
+### 2. Antibiotic Susceptibility Data
 
 1. To ensure functionality, make sure you have at least one month's worth of resistance data in the `resistance_data_dump` folder.
 2. This process will generate `resistance_df.csv` (the combined resistance data), `resistance_count_df.csv` (the cleaned and transformed data), and `resistance_col_df.csv` (for antibiogram).
