@@ -32,3 +32,4 @@
 4. To remove or edit data, navigate to the resistance_data_dump folder. This folder contains all the data uploaded to the dashboard. Make your edits or deletions within this folder.
 5. After the dashboard starts, click "refresh susceptibility data." It will process all the files in the resistance_data_dump folder, clean them, and then load them onto the dashboard.
 6. To add a new dataset, visit the update_data page and navigate to the update_data section for resistance. There, you can upload multiple new files.
+7. Another way to add data is to directly place it in the resistance_data_dump folder and click "refresh susceptibility data".
