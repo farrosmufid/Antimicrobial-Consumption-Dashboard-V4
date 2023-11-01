@@ -48,6 +48,13 @@ def read_and_concat_orders_file():
             df_new.to_csv('./orders_data_clean/clean.csv', index = False, quoting = 1)
             print("update clean.csv.")
 
+            print("transform dot ddd dasc one month")
+            final_df = dot_ddd_dasc(ddd)
+
+            final_df.to_csv("./orders_data_clean/final_df.csv", index = False, quoting = 1)
+
+            print("finish transform dot ddd dasc one month")
+
         if not os.path.exists('./orders_data_clean/clean.csv'):
             df = cleaning(df)
             df_copy=df.copy(deep=True)
@@ -63,14 +70,16 @@ def read_and_concat_orders_file():
             print("create clean.csv for the first time.")
             df_copy.to_csv('./orders_data_clean/clean.csv', index = False, quoting = 1)
 
+            print("transform dot ddd dasc one month")
+            final_df = dot_ddd_dasc(ddd)
+
+            final_df.to_csv("./orders_data_clean/final_df.csv", index = False, quoting = 1)
+
+            print("finish transform dot ddd dasc one month")
+
         print("one month of order cleaning file end")
     
-    print("transform dot ddd dasc")
-    final_df = dot_ddd_dasc(ddd)
-
-    final_df.to_csv("./orders_data_clean/final_df.csv", index = False, quoting = 1)
-
-    print("finish transform dot ddd dasc")
+    
 
 # Execute read_and_concat_orders_file()
 
