@@ -36,8 +36,8 @@
 4. Join all dataframe together and remove duplicates
 
 ### Defined Daily Dose (DDD) Calculation Process
-
 Total_DDD = DOSE x FREQUENCY x (START_DTTM - STOP_DTTM + 1) / DDD_metric (match ORDER_GENERIC and RX_ROUTE).
+
 1. If DOSE is not valid, extract information from ORDER_NAME and VOLUME_DOSE. Use ORDER_NAME x VOLUME_DOSE as DOSE.
 2. Exclude prescription orders with topical routes that cannot be quantified. <br>VOLUME_DOSE = ‘drop’, ‘application’, and RX_ROUTE = ‘EYE’, ‘NOSTRIL’. 
 3. Exclude rows with conflicting information in ORDER_NAME and VOLUME_DOSE. <br>e.g. ‘tablets’ in ORDER_NAME but ‘mL’ in VOLUME_DOSE. 
@@ -68,6 +68,18 @@ Instructions to make changes to the WHO DDD metric table (csv):
 - The value in the Adm.R needs to be either ‘O’, ‘P’, or ‘R’, no exception. If this new change has DDD metric for multiple routes, the name columns must be filled. 
 - If the WHO has changed the DDD metric for an antibiotic type (or combination) already included in the table, please manually change the ‘DDD’ field accordingly (convert value if the unit is ‘g’).
 
-### Days of Therapy (DOT) Calculation Process and (dASC)
+### Days of Therapy (DOT) and Days of Antibiotic Spectrum Coverage (dASC) Calculation Process
+1. Clean data frame is processed and records where MRN, ADMIT_DATE, ORDER_GENERIC, START_DTTM and STOP_DTTM are dropped. The availability of these fields are required to produce the metrics.
+2. Remove duplicate records present across the 5 fields.
+3. Partition the data by MRN, ADMIT_DATE, ORDER_GENERIC and START_DTTM and sort in ascending order.
+4. Go through each row, take the current record and compare against the next. (To deal with overlapping treatment dates.)
+5. If MRN, ADMIT_DATE, ORDER_GENERIC don’t match, capture the current record.
+6. If MRN, ADMIT_DATE, ORDER_GENERIC match, deal with any overlapping time periods (START_DTTM to STOP_DTTM) to ensure overcalculation doesn’t occur. If they’re no overlaps, capture the current record.
+7. The captured records should contain a unique row for each MRN, ADMIT_DATE and ORDER_GENERIC. 
+8. Take all the captured records and calculate Days of Therapy (DOT) = STOP_DTTM - START_DTTM + 1 (Days between Stop Date and Start Date aggregated by antibiotic type.)
+9. Take the sum of therapy days for the same ORDER_GENERIC value to produce the final aggregated view for DOT.
+10. Calculate Days of Antibiotic Spectrum Coverage (dASC) by multiplying DOT and ASC_SCORE. ASC_SCORE is an editable file containing a list of all ORDER_GENERIC types in our reports that have a ASC score listed on https://academic.oup.com/cid/article/75/4/567/6463001.
+11. Join the new DOT and dASC metric with the first START_DTTM for each antibiotic type per admission. The first of these types of records will be summary rows for these metrics.
+
 
 
