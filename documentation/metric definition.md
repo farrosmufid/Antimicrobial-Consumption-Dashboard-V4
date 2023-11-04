@@ -1,4 +1,4 @@
-# Antimicrobial Consumption Dashboard Guide
+# Metric Definition & Data Processing Steps
 
 ## 1. Metric Definition
 
@@ -12,7 +12,7 @@
 | **Susceptibility Rate** | Resistance | The susceptibility rate refers to the percentage that a particular antibiotic is susceptible to fighting infection. <br>S (Susceptible) Tests + S-DD (Susceptible Dose Dependent) Tests + S-IE (Susceptible Increased Exposure) Tests / Total Tests |
 | **Count of Tests** | Resistance | The total number of tests completed during a specified timeframe and with filters applied. Only the first antibiotic/organism test result per patient in the given timeframe will be counted to limit duplication and inflation of results. <br>S (Susceptible) Tests + S-DD (Susceptible Dose Dependent) Tests + S-IE (Susceptible Increased Exposure) Tests + I (Intermediate) Tests + R (Resistant) Tests = Total Tests |
 
-## 2. Data Processing
+## 2. Data Processing Steps
 
 ### Cleaning & Update Process
 #### a) Cleaning Function
@@ -68,7 +68,7 @@ Instructions to make changes to the WHO DDD metric table (csv):
 - The value in the Adm.R needs to be either ‘O’, ‘P’, or ‘R’, no exception. If this new change has DDD metric for multiple routes, the name columns must be filled. 
 - If the WHO has changed the DDD metric for an antibiotic type (or combination) already included in the table, please manually change the ‘DDD’ field accordingly (convert value if the unit is ‘g’).
 
-### Days of Therapy (DOT) and Days of Antibiotic Spectrum Coverage (dASC) Calculation Process
+### Days of Therapy (DOT) & Days of Antibiotic Spectrum Coverage (dASC) Calculation Process
 1. Clean data frame is processed and records where MRN, ADMIT_DATE, ORDER_GENERIC, START_DTTM and STOP_DTTM are dropped. The availability of these fields are required to produce the metrics.
 2. Remove duplicate records present across the 5 fields.
 3. Partition the data by MRN, ADMIT_DATE, ORDER_GENERIC and START_DTTM and sort in ascending order.
