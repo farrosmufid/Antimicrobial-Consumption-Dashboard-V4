@@ -65,16 +65,16 @@ def read_and_transform_resistance_data_model():
     df.reset_index(drop = True, inplace = True)
     df = df[(df['INTERP'] == 'I') | (df['INTERP'] == 'R') | (df['INTERP'] == 'S') | (df['INTERP'] == 'S-DD') | (df['INTERP'] == 'S-IE')] # select only values equal to I, R, S, S-DD, S-IE
     df['ADMITTING_MO'] = df['ADMITTING_MO'].str.replace(r'\s?\(.*\)', '', regex=True) # remove medical officer and specialist medical officer
-    condition = (~df['ORDERABLE'].isin(['Blood Culture', 'Culture Urine']))
-    replacement = 'Culture Other'
-    df['ORDERABLE'] = np.where(condition, replacement, df['ORDERABLE'])
+    # condition = (~df['ORDERABLE'].isin(['Blood Culture', 'Culture Urine']))
+    # replacement = 'Culture Other'
+    # df['ORDERABLE'] = np.where(condition, replacement, df['ORDERABLE'])
     df = df.drop_duplicates(keep='first')
 
     print("finished cleaning ...")
 
     print("start pivot ...")
 
-    pivot_df = df.pivot_table(index=['MRN','DATE_OF_BIRTH','ACCESSION','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
+    pivot_df = df.pivot_table(index=['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
 
     # Reset the index if you want 'MRN' and 'ORGANISM_NAME' to be regular columns
     pivot_df.reset_index(inplace=True)
@@ -89,8 +89,10 @@ def read_and_transform_resistance_data_model():
 
     print("finished pivot ...")
 
-    df.fillna({'MRN': -1,'ACCESSION': -1,'DATE_OF_BIRTH': -1,'ANTIBIOTIC': -1, 'ORGANISM_NAME': -1, 'ORDERABLE': -1, 'NURSE_LOC': -1, 'ADMITTING_MO': -1, 'MED_SERVICE': -1}, inplace=True)
-    
+    df = df.drop('ACCESSION', axis=1)
+    df = df.drop_duplicates(keep='first')
+
+    df.fillna({'MRN': -1,'DATE_OF_BIRTH': -1,'ANTIBIOTIC': -1, 'ORGANISM_NAME': -1, 'ORDERABLE': -1, 'NURSE_LOC': -1, 'ADMITTING_MO': -1, 'MED_SERVICE': -1}, inplace=True)
 
     print("start summing the subsceptible, resistance, and intermediate count ...")
     # Sum the subsceptible, resistance, intermediate count
@@ -156,6 +158,20 @@ def read_and_transform_resistance_data_model():
     print("read_and_transform_resistance_data_model() finished ...")
 
     return count.copy(deep = True)
+
+
+def load_pivot_df():
+    '''
+    Function to load the pivotted version of the susceptibility data
+
+    WARNING: 
+    This function should only be called after read_and_transform_resistance_data_model() 
+    to ensure the susceptibility data is properly loaded
+    '''
+    df = pd.read_csv("./resistance_data_clean/susceptibility_download.csv")
+    df['COLLECT_DT_TM'] = pd.to_datetime(df['COLLECT_DT_TM']) # convert to datetime format
+
+    return df.copy(deep = True)
 
 ## -- END RESISTANCE DATA MODEL
 
@@ -443,7 +459,19 @@ layout = html.Div([
     ),
 
     # Line chart for resistance rate over time
-    dcc.Graph(id='line-chart')
+    dcc.Graph(id='line-chart'),
+    
+    # Download buttons
+    dbc.Row([
+        dbc.Col([
+            dbc.Button("Download filtered data csv", id = "download-filtered-data-btn-susceptibility-page"),
+            dcc.Download(id = "download-filtered-data-frame-csv-susceptibility-page-df")
+        ]),
+        dbc.Col([
+            dbc.Button("Download aggregated data csv", id = "download-aggregated-data-btn-susceptibility-page"),
+            dcc.Download(id = "download-aggregated-data-frame-csv-susceptibility-page-df")
+        ])
+    ]),
 ])
 
 ## -- END LAYOUT
@@ -501,6 +529,58 @@ def refresh_and_initialize_resistance_data(data):
 
 ## END INITIALISATION CALLBACK FUNCTION
 
+# Callback for Orderable Dropdown
+@callback(
+    Output('orderable-dropdown', 'options'),
+    Input('antibiotic-dropdown', 'value'),
+    Input('med-service-dropdown', 'value'),
+    Input('nurse-loc-dropdown', 'value'),
+    Input('mo-dropdown', 'value'),
+    Input('organism-dropdown', 'value'),
+    # Coming from the refresh_and_initialize_resistance_data() function
+    Input('intermediate-div-resistance-page', 'children')
+)
+def update_orderable_options(
+                             selected_antibiotic, 
+                             selected_med_service, 
+                             selected_nurse_loc, 
+                             selected_mo, 
+                             selected_organism, 
+                             intermediate_data):
+    
+    filtered_df = load_resistance_data_model()
+
+    if selected_antibiotic:
+        if isinstance(selected_antibiotic, str):
+            selected_antibiotic = [selected_antibiotic]
+        filtered_df = filtered_df[filtered_df['ANTIBIOTIC'].isin(selected_antibiotic)]
+
+    if selected_med_service:
+        if isinstance(selected_med_service, str):
+            selected_med_service = [selected_med_service]
+        filtered_df = filtered_df[filtered_df['MED_SERVICE'].isin(selected_med_service)]
+
+    if selected_nurse_loc:
+        if isinstance(selected_nurse_loc, str):
+            selected_nurse_loc = [selected_nurse_loc]
+        filtered_df = filtered_df[filtered_df['NURSE_LOC'].isin(selected_nurse_loc)]
+
+    if selected_mo:
+        if isinstance(selected_mo, str):
+            selected_mo = [selected_mo]
+        filtered_df = filtered_df[filtered_df['ADMITTING_MO'].isin(selected_mo)]
+    
+    if selected_organism:
+        if isinstance(selected_organism, str):
+            selected_organism = [selected_organism]
+        filtered_df = filtered_df[filtered_df['ORGANISM_NAME'].isin(selected_organism)]
+
+    filtered_options = sorted(filtered_df['ORDERABLE'].dropna().unique())
+    options = [{'label': option, 'value': option} for option in filtered_options]
+
+    return options
+
+
 # Callback for Antibiotic Dropdown
 
 @callback(
@@ -557,7 +637,6 @@ def update_antibiotic_options(
     options = [{'label': option, 'value': option} for option in filtered_options]
 
     return options
-
 
 # Callback for Organism Dropdown
 
@@ -1354,3 +1433,164 @@ def update_bar_chart(selected_orderable, selected_antibiotic, selected_med_servi
     )
 
     return fig
+
+# Callback for Filtered Download
+@callback(
+    Output('download-filtered-data-frame-csv-susceptibility-page-df', 'data'),
+    Input('orderable-dropdown', 'value'),
+    Input('antibiotic-dropdown', 'value'),
+    Input('nurse-loc-dropdown', 'value'),
+    Input('mo-dropdown', 'value'),
+    Input('organism-dropdown', 'value'),
+    Input('med-service-dropdown', 'value'),
+    Input('date-range-picker', 'start_date'),
+    Input('date-range-picker', 'end_date'),
+    Input('download-filtered-data-btn-susceptibility-page', 'n_clicks')
+)
+
+def download_filtered_data(
+                            selected_orderable, 
+                            selected_antibiotic, 
+                            selected_nurse_loc, 
+                            selected_mo, 
+                            selected_organism, 
+                            selected_med_service, 
+                            start_date, 
+                            end_date,
+                            download_filtered_data_btn_n_clicks
+                            ):
+
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+    
+    filtered_df_load = load_resistance_data_model()
+    filtered_df = load_pivot_df()
+
+    if selected_orderable:
+        filtered_df = filtered_df[filtered_df['ORDERABLE'].isin(selected_orderable)]
+    
+#     if selected_antibiotic:
+#         filtered_df = filtered_df[filtered_df['ANTIBIOTIC'].isin(selected_antibiotic)]
+
+    if selected_med_service:
+            filtered_df = filtered_df[filtered_df['MED_SERVICE'].isin(selected_med_service)]
+    
+    if selected_nurse_loc:
+        filtered_df = filtered_df[filtered_df['NURSE_LOC'].isin(selected_nurse_loc)]
+    
+    if selected_mo:
+        filtered_df = filtered_df[filtered_df['ADMITTING_MO'].isin(selected_mo)]
+    
+    if selected_organism:
+        filtered_df = filtered_df[filtered_df['ORGANISM_NAME'].isin(selected_organism)]
+   
+    
+    # Filter the DataFrame based on the selected date range
+    filtered_df = filtered_df[(filtered_df['COLLECT_DT_TM'] >= start_date) & (filtered_df['COLLECT_DT_TM'] <= end_date)]
+    
+#     deduplicated_df = filtered_df.sort_values(by='COLLECT_DT_TM').drop_duplicates(
+#         subset=['MRN', 'ANTIBIOTIC', 'ORGANISM_NAME'],
+#         keep='first'
+#     )
+
+#     key_columns = ['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME']
+
+#     if selected_antibiotic is None:
+#         filtered_df
+#         # If no selection is made, return all columns from the DataFrame
+# #         columns_to_display = key_columns + list(df.columns[2:])  # Assumes the key columns are at index 0 and 1
+
+#     else:
+#         # Combine the key columns with the selected antibiotic columns
+#         columns_to_display = key_columns + selected_antibiotic
+#         filtered_df = filtered_df[columns_to_display]
+
+    # Download csv functionality
+    download_val = None
+
+    if "download-filtered-data-btn-susceptibility-page" == ctx.triggered_id:
+        print("DOWNLOAD FILTERED DATA CLICKED")
+        download_val = dcc.send_data_frame(filtered_df.to_csv, "filtered-raw-extract-susceptibility.csv", index = False)
+    else:
+        download_val = dash.no_update
+    
+    return download_val
+
+# Callback for Filtered Download
+@callback(
+    Output('download-aggregated-data-frame-csv-susceptibility-page-df', 'data'),
+    Input('orderable-dropdown', 'value'),
+    Input('antibiotic-dropdown', 'value'),
+    Input('nurse-loc-dropdown', 'value'),
+    Input('mo-dropdown', 'value'),
+    Input('organism-dropdown', 'value'),
+    Input('med-service-dropdown', 'value'),
+    Input('date-range-picker', 'start_date'),
+    Input('date-range-picker', 'end_date'),
+    Input('download-aggregated-data-btn-susceptibility-page', 'n_clicks')
+)
+def download_aggregated_data(
+                            selected_orderable, 
+                            selected_antibiotic, 
+                            selected_nurse_loc, 
+                            selected_mo, 
+                            selected_organism, 
+                            selected_med_service, 
+                            start_date, 
+                            end_date,
+                            download_aggregated_data_btn_n_clicks
+                            ):
+    
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+    
+    filtered_df = load_resistance_data_model()
+
+    if selected_orderable:
+        filtered_df = filtered_df[filtered_df['ORDERABLE'].isin(selected_orderable)]
+    
+    if selected_antibiotic:
+        filtered_df = filtered_df[filtered_df['ANTIBIOTIC'].isin(selected_antibiotic)]
+
+    if selected_med_service:
+            filtered_df = filtered_df[filtered_df['MED_SERVICE'].isin(selected_med_service)]
+    
+    if selected_nurse_loc:
+        filtered_df = filtered_df[filtered_df['NURSE_LOC'].isin(selected_nurse_loc)]
+    
+    if selected_mo:
+        filtered_df = filtered_df[filtered_df['ADMITTING_MO'].isin(selected_mo)]
+    
+    if selected_organism:
+        filtered_df = filtered_df[filtered_df['ORGANISM_NAME'].isin(selected_organism)]
+   
+    
+    # Filter the DataFrame based on the selected date range
+    filtered_df = filtered_df[(filtered_df['COLLECT_DT_TM'] >= start_date) & (filtered_df['COLLECT_DT_TM'] <= end_date)]
+    
+    deduplicated_df = filtered_df.sort_values(by='COLLECT_DT_TM').drop_duplicates(
+        subset=['MRN', 'ANTIBIOTIC', 'ORGANISM_NAME'],
+        keep='first'
+    )
+
+#     key_columns = ['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME']
+
+#     if selected_antibiotic is None:
+#         filtered_df
+#         # If no selection is made, return all columns from the DataFrame
+# #         columns_to_display = key_columns + list(df.columns[2:])  # Assumes the key columns are at index 0 and 1
+
+#     else:
+#         # Combine the key columns with the selected antibiotic columns
+#         columns_to_display = key_columns + selected_antibiotic
+#         filtered_df = filtered_df[columns_to_display]
+
+    # Download csv functionality
+    download_val = None
+
+    if "download-aggregated-data-btn-susceptibility-page" == ctx.triggered_id: # same name as the id
+        download_val = dcc.send_data_frame(filtered_df.to_csv, "aggregated-susceptibility.csv", index = False)
+    else:
+        download_val = dash.no_update
+    
+    return download_val
