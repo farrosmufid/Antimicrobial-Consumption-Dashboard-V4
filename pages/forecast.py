@@ -139,9 +139,9 @@ def create_mean_dASC_trend_forecast_version_plot_from_grouped_df(dASC_grouped_df
     mean_dASC_trend_plot.update_xaxes(tickvals=distinct_months_years, \
                                     ticktext=[pd.to_datetime(date).strftime('%b %Y') for date in distinct_months_years])
     
-    mean_dASC_trend_plot.update_layout(title="Mean dASC {} Trend by {}".format(trend_text, group_category_text))
+    mean_dASC_trend_plot.update_layout(title="Average dASC {} Trend by {}".format(trend_text, group_category_text))
     mean_dASC_trend_plot.update_layout(xaxis_title="Order Month Year")
-    mean_dASC_trend_plot.update_layout(yaxis_title="Mean dASC")
+    mean_dASC_trend_plot.update_layout(yaxis_title="Average dASC")
     mean_dASC_trend_plot.update_layout(legend_title=dict(text = "{}".format(group_category_text)), font=dict(size=9))
 
     # Only shows the dotted line only if max_actual_month_year is provided it contains forecasted data 
