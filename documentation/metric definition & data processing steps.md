@@ -66,7 +66,7 @@ Instructions to make changes to the WHO DDD metric table (csv):
 - The value in the DDD field needs to be a number with no comma (convert if the original DDD metric has ‘g’ as unit).
 - The value in the ‘U’ field needs to be either ‘mg’ or ‘unit’, no exception.
 - The value in the Adm.R needs to be either ‘O’, ‘P’, or ‘R’, no exception. If this new change has DDD metric for multiple routes, the name columns must be filled. 
-- If the WHO has changed the DDD metric for an antibiotic type (or combination) already included in the table, please manually change the ‘DDD’ field accordingly (convert value if the unit is ‘g’).
+- If WHO has changed the DDD metric for an antibiotic type (or combination), please manually change the ‘DDD’ field accordingly (convert value if the unit is ‘g’).
 
 ### Days of Therapy (DOT) & Days of Antibiotic Spectrum Coverage (dASC) Calculation Process
 1. Clean data frame is processed and records where MRN, ADMIT_DATE, ORDER_GENERIC, START_DTTM and STOP_DTTM are dropped. The availability of these fields are required to produce the metrics.
