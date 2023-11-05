@@ -81,5 +81,19 @@ Instructions to make changes to the WHO DDD metric table (csv):
 10. Calculate Days of Antibiotic Spectrum Coverage (dASC) by multiplying DOT and ASC_SCORE. ASC_SCORE is an editable file containing a list of all ORDER_GENERIC types in our reports that have a ASC score listed on https://academic.oup.com/cid/article/75/4/567/6463001.
 11. Join the new DOT and dASC metric with the first START_DTTM for each antibiotic type per admission. The first of these types of records will be summary rows for these metrics.
 
+### Susceptibility 
+#### a) Cleaning Process
+1. COLLECT_DT_TM converted to date format: DD/MM/YYYY
+2. CLIENT is set to Westmead Hospital to only include test results from Westmead
+3. Columns that are kept include: ORDERABLE, ACCESSION, MRN, DATE_OF_BIRTH, COLLECT_DT_TM, ORGANISM_NAME, CLIENT, NURSE_LOC, ADMITTING_MO, MED_SERVICE, ANTIBIOTIC, INTERP. All other columns are removed for performance
+4. Rows containing only a valid result from INTERP are selected: S, R, S-IE, S-DD, I
+5. The words “Medical Officer” and “Specialist Medical Officer” are removed from values of ADMITTING_MO, leaving only name of doctor
+6. Any duplicate rows are removed
+7. This cleaned data is then pivoted to create file that can be downloaded, with information for MRN, DATE_OF_BIRTH, ACCESSION, COLLECT_DT_TM, ORDERABLE, MED_SERVICE, NURSE_LOC, ADMITTING_MO, ORGANISM_NAME remaining the same but then the all the values from ANTIBIOTIC are pivoted to be individual columns and the test result of INTERP to be the value under each of these columns
 
-
+#### b) Aggregation Process
+1. ACCESSION is removed as not required for calculations and duplicate rows removed
+2. 6 Columns are created: Count_S, Count_R, Count_S-IE, Count_S-DD, Count_I and sum
+3. The sum of each of the test results is calculated aggregated by the existing columns
+4. In order to fix a data issue, any row that has multiple results for the same test, a hierarchy is created taking the most severe result. For example if a patient has a resistant and a susceptible result for the same test, the resistant one is chosen. The hierarchy is R, S-IE, S
+5. Null values for MED_SERVICE are replaced by N/A
