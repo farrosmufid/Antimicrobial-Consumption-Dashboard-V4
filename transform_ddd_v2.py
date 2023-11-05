@@ -217,28 +217,28 @@ def transform_ddd(Fmonth):
         freq = row['TIME_PER_DAY']
         length=row['DOT_per_ORDER']
         StartStop.at[index,'total_dosage']=exact_amt*freq*length
-        if generic in DDD_lst:
-            filterDDD=DDD[DDD['name']==generic]
-            filter1DDD=filterDDD[filterDDD['Adm.R']==route]
-            filter2DDD=filter1DDD[filter1DDD['U']==unit]
-            if not filter2DDD.empty:
-    #             if len(filter2DDD['DDD']) >1:
-    #                 test.append(filter2DDD['name'].unique())
-                typeDDD=float(filter2DDD['DDD'])
-                StartStop.at[index,'DDD_per_day']=exact_amt*freq/typeDDD
-                StartStop.at[index, 'total_DDD']=exact_amt*freq*length/typeDDD
-        else:
-            for item in DDD_lst:
-                if generic in item or item in generic:
-                    filterDDD=DDD[DDD['name']==item]
-                    filter1DDD=filterDDD[filterDDD['Adm.R']==route]
-                    filter2DDD=filter1DDD[filter1DDD['U']==unit]
-                    if not filter2DDD.empty:
-    #                     if len(filter2DDD['DDD']) >1:
-    #                         test.append(filter2DDD['name'].unique())
-                        typeDDD=float(filter2DDD['DDD'])
-                        StartStop.at[index,'DDD_per_day']=exact_amt*freq/typeDDD
-                        StartStop.at[index, 'total_DDD']=exact_amt*freq*length/typeDDD
+        # Exclude trimethoprim-sulfamethoxazole because it doesn't have DDD metric but will be matched in Line 234 if statement.
+        if generic != "trimethoprim-sulfamethoxazole": 
+            if generic in DDD_lst:
+                filterDDD=DDD[DDD['name']==generic]
+                filter1DDD=filterDDD[filterDDD['Adm.R']==route]
+                filter2DDD=filter1DDD[filter1DDD['U']==unit]
+                if not filter2DDD.empty:
+        #             if len(filter2DDD['DDD']) >1:
+        #                 test.append(filter2DDD['name'].unique())
+                    typeDDD=float(filter2DDD['DDD'])
+                    StartStop.at[index,'DDD_per_day']=exact_amt*freq/typeDDD
+                    StartStop.at[index, 'total_DDD']=exact_amt*freq*length/typeDDD
+            else:
+                for item in DDD_lst:
+                    if generic in item or item in generic:
+                        filterDDD=DDD[DDD['name']==item]
+                        filter1DDD=filterDDD[filterDDD['Adm.R']==route]
+                        filter2DDD=filter1DDD[filter1DDD['U']==unit]
+                        if not filter2DDD.empty:
+                            typeDDD=float(filter2DDD['DDD'])
+                            StartStop.at[index,'DDD_per_day']=exact_amt*freq/typeDDD
+                            StartStop.at[index, 'total_DDD']=exact_amt*freq*length/typeDDD
     Fmonth['total_DDD']=None
     Fmonth['total_dosage']=None
     Fmonth['DOSE_UNIT']=None
