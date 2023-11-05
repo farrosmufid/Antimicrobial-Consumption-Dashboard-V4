@@ -19,8 +19,11 @@
 | **Length of Stay vs. Number of Patients (Bar Graph)** | This bar chart displays the number of patients and their length of stay. <br>There are separate filters for selection for this chart, including Order Generic, AMS Indication, Frequency and Dose. | ![image](https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/93821446/3ebaa9c3-cf6f-42e3-b86b-e1dc42ca9492)|
 
 ## 4. Forecast
+The forecast page shows three visualisations that include current and forecasting value of the monthly average dASC of antibiotic types. The three line chart visualisations show increasing trend, stable trend, and decreasing trend separately. The visualisations would only display antibiotic types that have at least 4 different monthly records in the current imported data.
 | Chart | Description | Visualisation |
 | :-: | - | - |
+| **Filters** | The forecast section has two filters that apply to the three visualisations. On top of the page, a date range picker would allow the user to select the time frame of the data. Based on the selected date range, the visualisation would show the forecast result. Underneath the textual introduction, the dropdown menu allows users to single select antibiotic type for display in the forecast visualisation. | |
+| **Buttons** | The button with text “View full date range” at the top of the forecast page allows users to reset the data after an arbitrary date range is selected in the date picker. At the bottom of the forecast page, there are four buttons. The first button allows users to reset to original data so that the visualisation would only display the monthly mean dASC value for all current imported data. The second button would allow users to view a 6 month forecast, and the third for a 12 month forecast. The fourth button would allow users to download the raw forecasting data based on selection. | |
 
 ## 5. Susceptibility
 | Chart | Description | Visualisation |
