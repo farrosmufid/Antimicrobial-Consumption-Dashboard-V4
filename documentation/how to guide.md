@@ -28,3 +28,5 @@ The forecast page shows three visualisations that include current and forecastin
 ## 5. Susceptibility
 | Chart | Description | Visualisation |
 | :-: | - | - |
+| **Top 10 by Lowest Susceptibility** | There are two horizontal bar charts that give insight into the antibiotics and organisms with the top 10 lowest susceptibility rates based on any filters applied, to give the user an idea of potential antibiotics or organisms to be wary of for the period of time selected.  | ![image](https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/93821446/f9d906c5-d8fb-4f08-afe5-165948276cf5) |
+| **Antibiogram** |
