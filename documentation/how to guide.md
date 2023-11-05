@@ -5,7 +5,7 @@
 
 ### Description
 The update page contains 2 areas to upload antibiotic orders data and susceptibility results data. 
-<br>Upload your raw data in the relevant boxes for cleaning and transformation. If the file is not in the accepted format, it will throw an error. 
+<br>Upload raw data in the relevant boxes for cleaning and transformation. If the file is not in the accepted format, it will throw an error. 
 <br>Files uploaded will have their minimum and maximum date listed. 
 <br>If you've uploaded a file that you wish to remove, simply go to the orders_data_dump folder and delete that file. Then proceed to click "Refresh order data" or "Refresh susceptibility data" to reload the cleaning and transformation process.
 <br>Click "Download cleaned data csv" to get a cleaned copy of your raw data.
