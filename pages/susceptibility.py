@@ -74,6 +74,10 @@ def read_and_transform_resistance_data_model():
 
     print("start pivot ...")
 
+    # Pivot does not work if there are null values in the row
+
+    df.fillna({'MRN': 'N/A','DATE_OF_BIRTH': 'N/A','ANTIBIOTIC': 'N/A', 'ORGANISM_NAME': 'N/A', 'ORDERABLE': 'N/A', 'NURSE_LOC': 'N/A', 'ADMITTING_MO': 'N/A', 'MED_SERVICE': 'N/A'}, inplace=True)
+
     pivot_df = df.pivot_table(index=['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
 
     # Reset the index if you want 'MRN' and 'ORGANISM_NAME' to be regular columns
@@ -92,7 +96,6 @@ def read_and_transform_resistance_data_model():
     df = df.drop('ACCESSION', axis=1)
     df = df.drop_duplicates(keep='first')
 
-    df.fillna({'MRN': -1,'DATE_OF_BIRTH': -1,'ANTIBIOTIC': -1, 'ORGANISM_NAME': -1, 'ORDERABLE': -1, 'NURSE_LOC': -1, 'ADMITTING_MO': -1, 'MED_SERVICE': -1}, inplace=True)
 
     print("start summing the subsceptible, resistance, and intermediate count ...")
     # Sum the subsceptible, resistance, intermediate count
@@ -1473,7 +1476,7 @@ def download_filtered_data(
 #         filtered_df = filtered_df[filtered_df['ANTIBIOTIC'].isin(selected_antibiotic)]
 
     if selected_med_service:
-            filtered_df = filtered_df[filtered_df['MED_SERVICE'].isin(selected_med_service)]
+        filtered_df = filtered_df[filtered_df['MED_SERVICE'].isin(selected_med_service)]
     
     if selected_nurse_loc:
         filtered_df = filtered_df[filtered_df['NURSE_LOC'].isin(selected_nurse_loc)]
@@ -1493,23 +1496,18 @@ def download_filtered_data(
 #         keep='first'
 #     )
 
-#     key_columns = ['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME']
+    key_columns = ['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME']
 
-#     if selected_antibiotic is None:
-#         filtered_df
-#         # If no selection is made, return all columns from the DataFrame
-# #         columns_to_display = key_columns + list(df.columns[2:])  # Assumes the key columns are at index 0 and 1
+    if selected_antibiotic:
+        # Combine the key columns with the selected antibiotic columns
 
-#     else:
-#         # Combine the key columns with the selected antibiotic columns
-#         columns_to_display = key_columns + selected_antibiotic
-#         filtered_df = filtered_df[columns_to_display]
-
+        columns_to_display = key_columns + selected_antibiotic
+        filtered_df = filtered_df[columns_to_display]
+     
     # Download csv functionality
     download_val = None
 
     if "download-filtered-data-btn-susceptibility-page" == ctx.triggered_id:
-        print("DOWNLOAD FILTERED DATA CLICKED")
         download_val = dcc.send_data_frame(filtered_df.to_csv, "filtered-raw-extract-susceptibility.csv", index = False)
     else:
         download_val = dash.no_update
