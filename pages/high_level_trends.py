@@ -90,9 +90,9 @@ def create_mean_dASC_trend_plot(df_copy, group_category, group_category_text):
     mean_dASC_trend_plot.update_xaxes(tickvals=distinct_months_years, \
                                     ticktext=[pd.to_datetime(date).strftime('%b %Y') for date in distinct_months_years])
     
-    mean_dASC_trend_plot.update_layout(title="Mean dASC Trend by {}".format(group_category_text))
+    mean_dASC_trend_plot.update_layout(title="Average dASC Trend by {}".format(group_category_text))
     mean_dASC_trend_plot.update_layout(xaxis_title="Order Month Year")
-    mean_dASC_trend_plot.update_layout(yaxis_title="Mean dASC")
+    mean_dASC_trend_plot.update_layout(yaxis_title="Average dASC")
     mean_dASC_trend_plot.update_layout(legend_title=dict(text = "{}".format(group_category_text)), font=dict(size=9))
 
     return mean_dASC_trend_plot
@@ -775,7 +775,7 @@ def update_datatable_trends(show_all_button, start_date, end_date, value):
         'DOCTOR': 'Doctor',
         'AMS_INDICATION': 'AMS Indication',
         'ORDER_MONTH_YEAR': 'Order Month Year',
-        'MEAN_dASC': 'Mean dASC',
+        'MEAN_dASC': 'Average dASC',
         'TOTAL_DOT': 'Total DOT',
         'TOTAL_DDD': 'Total DDD',
         'AVG_DOT': 'Average DOT'
