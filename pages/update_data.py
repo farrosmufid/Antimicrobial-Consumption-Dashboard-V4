@@ -120,6 +120,10 @@ def read_and_transform_resistance_data_model():
 
     print("start pivot ...")
 
+    # Pivot does not work if there are null values in the row
+    
+    df.fillna({'MRN': 'N/A','DATE_OF_BIRTH': 'N/A','ANTIBIOTIC': 'N/A', 'ORGANISM_NAME': 'N/A', 'ORDERABLE': 'N/A', 'NURSE_LOC': 'N/A', 'ADMITTING_MO': 'N/A', 'MED_SERVICE': 'N/A'}, inplace=True)
+
     pivot_df = df.pivot_table(index=['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
 
     # Reset the index if you want 'MRN' and 'ORGANISM_NAME' to be regular columns
@@ -138,8 +142,6 @@ def read_and_transform_resistance_data_model():
     df = df.drop('ACCESSION', axis=1)
     df = df.drop_duplicates(keep='first')
     
-    df.fillna({'MRN': -1,'DATE_OF_BIRTH': -1,'ANTIBIOTIC': -1, 'ORGANISM_NAME': -1, 'ORDERABLE': -1, 'NURSE_LOC': -1, 'ADMITTING_MO': -1, 'MED_SERVICE': -1}, inplace=True)
-
     print("start summing the subsceptible, resistance, and intermediate count ...")
     # Sum the subsceptible, resistance, intermediate count
     S = df.groupby(by = ['MRN','ANTIBIOTIC','ORGANISM_NAME','ORDERABLE','NURSE_LOC','ADMITTING_MO','MED_SERVICE','COLLECT_DT_TM'])['INTERP'].apply(lambda x: (x == 'S').sum()).reset_index().rename(columns = {'INTERP':'Count_S'})
