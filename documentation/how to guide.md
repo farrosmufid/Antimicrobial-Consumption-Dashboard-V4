@@ -7,6 +7,8 @@
 ## 2. High Level Trends
 | Chart | Description | Visualisation |
 | :-: | - | - |
+| **Tabular Filters** | The date filter on top, which is specific for the table below, allows users to decide the period of interest. The button on the right allows you to remove the filter and show the full date range of stats. The five options on top of table allows users to check DOT, DDD and dASC stats specific to each medical service, ward, doctor, and AMS indication. ||
+| **Chart Filters** | These filters have overall control of high-level visualisations. These filters give users the ability to specify the type of order status, order generic, medical service, ward, doctor and AMS indication that they want to look at. We have 5 tabs and each tab allows users to see the trends of average dASC, total DOT, total DDD and average DOT against time. ||
 
 ## 3. Deep Dive
 | Chart | Description | Visualisation |
