@@ -36,8 +36,5 @@ The forecast page shows three visualisations that include current and forecastin
 | Chart | Description | Visualisation |
 | :-: | - | - |
 | **Top 10 by Lowest Susceptibility** | There are two horizontal bar charts that give insight into the antibiotics and organisms with the top 10 lowest susceptibility rates based on any filters applied, to give the user an idea of potential antibiotics or organisms to be wary of for the period of time selected.  | ![image](https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/93821446/f9d906c5-d8fb-4f08-afe5-165948276cf5) |
-| **Antibiogram** | This is a summary table that contains the susceptibility rate and number of tests completed for each combination of organism and antibiotic. The user can filter and sort the table. <br>Susceptibility rates are coloured into 3 bands:
-<br>Below 70% is classified poor (red)
-<br>Between 70% and 89% is classified okay (yellow)
-<br>Equal or above 90% is classified good (green) <br><br> The default number of tests is 30+. This will remove any combinations from the antibiogram. For all combinations click "All".| ![image](https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/93821446/2c18c58d-c622-4af1-89e4-b768a0b75ad7) |
+| **Antibiogram** | This is a summary table that contains the susceptibility rate and number of tests completed for each combination of organism and antibiotic. The user can filter and sort the table. <br>| ![image](https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/93821446/2c18c58d-c622-4af1-89e4-b768a0b75ad7) |
 
