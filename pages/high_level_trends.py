@@ -56,7 +56,7 @@ top_trend_selection = [{'label' :'Order Generic', 'value': 'ORDER_GENERIC'},
 
 ## -- START LAYOUT HELPER FUNCTIONS --
 
-def generate_trends_tab(label_text, id_1, id_2, id_3, id_4):
+def generate_trends_tab(label_text, id_1, id_2, id_3, id_4, id_5):
     trends_tab = dbc.Tab(
         children = [
             dbc.CardGroup([
@@ -70,6 +70,9 @@ def generate_trends_tab(label_text, id_1, id_2, id_3, id_4):
             ]),
             dbc.CardGroup([
                 dbc.Card([dbc.CardBody(dcc.Graph(id = id_4))])
+            ]),
+            dbc.CardGroup([
+                dbc.Card([dbc.CardBody(dcc.Graph(id = id_5))])
             ])
         ]
         ,label = label_text
@@ -96,6 +99,26 @@ def create_mean_dASC_trend_plot(df_copy, group_category, group_category_text):
     mean_dASC_trend_plot.update_layout(legend_title=dict(text = "{}".format(group_category_text)), font=dict(size=9))
 
     return mean_dASC_trend_plot
+
+def create_total_dASC_trend_plot(df_copy, group_category, group_category_text):
+    # Drop NA
+    dASC_df = df_copy.dropna(subset=['dASC'])
+    # Group by
+    grouped_df = dASC_df.groupby([group_category, 'ORDER_MONTH_YEAR'])['dASC'].sum().reset_index(name='TOTAL_dASC')
+    # Plot
+    total_dASC_trend_plot = px.line(grouped_df, x = 'ORDER_MONTH_YEAR', y = 'TOTAL_dASC', color = group_category, \
+                                    markers = True)
+    # Update layout
+    distinct_months_years = grouped_df['ORDER_MONTH_YEAR'].unique()
+    total_dASC_trend_plot.update_xaxes(tickvals = distinct_months_years, \
+                                       ticktext = [pd.to_datetime(date).strftime('%b %Y') for date in distinct_months_years])
+    
+    total_dASC_trend_plot.update_layout(title = "Total dASC Trend by {}".format(group_category_text))
+    total_dASC_trend_plot.update_layout(xaxis_title = "Order Month Year")
+    total_dASC_trend_plot.update_layout(yaxis_title = "Total dASC")
+    total_dASC_trend_plot.update_layout(legend_title = dict(text = "{}".format(group_category_text)), font = dict(size = 9))
+
+    return total_dASC_trend_plot
 
 def create_total_DOT_trend_plot(df_copy, group_category, group_category_text):
     # Drop NA
@@ -161,11 +184,12 @@ def create_avg_dot_trend_plot(df_copy, group_category, group_category_text):
 def create_trend_plots_by_category(df_copy, group_category, group_category_text):
 
     mean_dASC_trend_plot_by_category = create_mean_dASC_trend_plot(df_copy, group_category, group_category_text)
+    total_dASC_trend_plot_by_category = create_total_dASC_trend_plot(df_copy, group_category, group_category_text)
     total_DOT_trend_plot_by_category = create_total_DOT_trend_plot(df_copy, group_category, group_category_text)
     total_DDD_trend_plot_by_category = create_total_DDD_trend_plot(df_copy, group_category, group_category_text)   
     avg_dot_trend_plot_by_category = create_avg_dot_trend_plot(df_copy, group_category, group_category_text)
 
-    return mean_dASC_trend_plot_by_category, total_DOT_trend_plot_by_category, \
+    return mean_dASC_trend_plot_by_category, total_dASC_trend_plot_by_category, total_DOT_trend_plot_by_category, \
         total_DDD_trend_plot_by_category, avg_dot_trend_plot_by_category
 
 def filter_date_and_update_text(df_copy, start_date, end_date, show_all_button_id = "show-all-button"):
@@ -233,28 +257,34 @@ def create_top_trend_df(df_copy, group_category):
     # Drop NA
     dASC_df = df_copy.dropna(subset=['dASC'])
     # Group by
-    grouped_dASC_df = dASC_df.groupby([group_category,'ORDER_MONTH_YEAR'])['dASC'].mean().reset_index(name='MEAN_dASC')
+    grouped_mean_dASC_df = dASC_df.groupby([group_category,'ORDER_MONTH_YEAR'])['dASC'].mean().reset_index(name='MEAN_dASC')
+    # Drop NA
+    dASC_df = df_copy.dropna(subset=['dASC'])
+    # Group by
+    grouped_total_dASC_df = dASC_df.groupby([group_category, 'ORDER_MONTH_YEAR'])['dASC'].sum().reset_index(name = 'TOTAL_dASC')
+    # Merge the two
+    merged_df = pd.merge(grouped_mean_dASC_df, grouped_total_dASC_df, on = [group_category, 'ORDER_MONTH_YEAR'], how = 'outer')    
     # Drop NA
     dot_df = df_copy.dropna(subset=['TOTAL_DOT'])
     # Group by
-    grouped_dot_df = dot_df.groupby([group_category,'ORDER_MONTH_YEAR'])['TOTAL_DOT'].sum().reset_index(name='TOTAL_DOT')
-    # Merge the two
-    merged_df = pd.merge(grouped_dASC_df, grouped_dot_df, on = [group_category, 'ORDER_MONTH_YEAR'], how = 'outer')
+    grouped_total_dot_df = dot_df.groupby([group_category,'ORDER_MONTH_YEAR'])['TOTAL_DOT'].sum().reset_index(name='TOTAL_DOT')
+    # Merge the three
+    merged_df = pd.merge(merged_df, grouped_total_dot_df, on = [group_category, 'ORDER_MONTH_YEAR'], how = 'outer')
     # Drop NA
     ddd_df = df_copy.dropna(subset=['TOTAL_DDD'])
     # Group by
-    grouped_ddd_df = ddd_df.groupby([group_category,'ORDER_MONTH_YEAR'])['TOTAL_DDD'].sum().reset_index(name='TOTAL_DDD')
-    # Merge the three
-    merged_df = pd.merge(merged_df, grouped_ddd_df, on = [group_category, 'ORDER_MONTH_YEAR'], how = 'outer')
+    grouped_total_ddd_df = ddd_df.groupby([group_category,'ORDER_MONTH_YEAR'])['TOTAL_DDD'].sum().reset_index(name='TOTAL_DDD')
+    # Merge the four
+    merged_df = pd.merge(merged_df, grouped_total_ddd_df, on = [group_category, 'ORDER_MONTH_YEAR'], how = 'outer')
     # Drop NA
     dot_df = df_copy.dropna(subset=['TOTAL_DOT'])
     # Group by
-    grouped_dot_df = dot_df.groupby([group_category,'ORDER_MONTH_YEAR'])['TOTAL_DOT'].mean().reset_index(name='AVG_DOT')
+    grouped_total_dot_df = dot_df.groupby([group_category,'ORDER_MONTH_YEAR'])['TOTAL_DOT'].mean().reset_index(name='AVG_DOT')
     # Merge the four
-    merged_df = pd.merge(merged_df, grouped_dot_df, on = [group_category, 'ORDER_MONTH_YEAR'], how = 'outer')
+    merged_df = pd.merge(merged_df, grouped_total_dot_df, on = [group_category, 'ORDER_MONTH_YEAR'], how = 'outer')
     
     # Round to two decimal places
-    merged_df = merged_df.round({'MEAN_dASC': 2, 'TOTAL_DOT': 2, 'TOTAL_DDD': 2, 'AVG_DOT': 2})
+    merged_df = merged_df.round({'MEAN_dASC': 2, 'TOTAL_dASC': 2, 'TOTAL_DOT': 2, 'TOTAL_DDD': 2, 'AVG_DOT': 2})
     
     return merged_df.copy(deep = True)
 
@@ -367,37 +397,42 @@ layout = html.Div(
                     generate_trends_tab(
                         label_text = "Trend by Order Generic", 
                         id_1 = "dASC-order-generic-plot", 
-                        id_2 = "total-dot-order-generic-plot",
-                        id_3 = "total-ddd-order-generic-plot",
-                        id_4 = "avg-dot-order-generic-plot"),
+                        id_2 = "total-dASC-order-generic-plot",
+                        id_3 = "total-dot-order-generic-plot",
+                        id_4 = "total-ddd-order-generic-plot",
+                        id_5 = "avg-dot-order-generic-plot"),
                     
                     generate_trends_tab(
                         label_text = "Trend by Medical Service", 
                         id_1 = "dASC-medical-service-plot", 
-                        id_2 = "total-dot-medical-service-plot",
-                        id_3 = "total-ddd-medical-service-plot",
-                        id_4 = "avg-dot-medical-service-plot"),
+                        id_2 = "total-dASC-medical-service-plot",
+                        id_3 = "total-dot-medical-service-plot",
+                        id_4 = "total-ddd-medical-service-plot",
+                        id_5 = "avg-dot-medical-service-plot"),
                     
                      generate_trends_tab(
                         label_text = "Trend by Ward", 
                         id_1 = "dASC-ward-plot", 
-                        id_2 = "total-dot-ward-plot",
-                        id_3 = "total-ddd-ward-plot",
-                        id_4 = "avg-dot-ward-plot"),
+                        id_2 = "total-dASC-ward-plot",
+                        id_3 = "total-dot-ward-plot",
+                        id_4 = "total-ddd-ward-plot",
+                        id_5 = "avg-dot-ward-plot"),
 
                      generate_trends_tab(
                         label_text = "Trend by Doctor", 
                         id_1 = "dASC-doctor-plot", 
-                        id_2 = "total-dot-doctor-plot",
-                        id_3 = "total-ddd-doctor-plot",
-                        id_4 = "avg-dot-doctor-plot"),
+                        id_2 = "total-dASC-doctor-plot",
+                        id_3 = "total-dot-doctor-plot",
+                        id_4 = "total-ddd-doctor-plot",
+                        id_5 = "avg-dot-doctor-plot"),
 
                     generate_trends_tab(
                         label_text = "Trend by AMS Indication", 
                         id_1 = "dASC-ams-indication-plot", 
-                        id_2 = "total-dot-ams-indication-plot",
-                        id_3 = "total-ddd-ams-indication-plot",
-                        id_4 = "avg-dot-ams-indication-plot")
+                        id_2 = "total-dASC-ams-indication-plot",
+                        id_3 = "total-dot-ams-indication-plot",
+                        id_4 = "total-ddd-ams-indication-plot",
+                        id_5 = "avg-dot-ams-indication-plot")
                 ]
             ),
             dbc.Button("Download csv", id = "btn-csv"),
@@ -597,30 +632,35 @@ def update_main_filter_values(
         # Output plot
         # Trend by Order Generic
         Output(component_id = "dASC-order-generic-plot", component_property = "figure"),
+        Output(component_id = "total-dASC-order-generic-plot", component_property = "figure"),
         Output(component_id = "total-dot-order-generic-plot", component_property = "figure"),
         Output(component_id = "total-ddd-order-generic-plot", component_property = "figure"),
         Output(component_id = "avg-dot-order-generic-plot", component_property = "figure"),
 
         # Trend by Medical Service
         Output(component_id = "dASC-medical-service-plot", component_property = "figure"),
+        Output(component_id = "total-dASC-medical-service-plot", component_property = "figure"),
         Output(component_id = "total-dot-medical-service-plot", component_property = "figure"),
         Output(component_id = "total-ddd-medical-service-plot", component_property = "figure"),
         Output(component_id = "avg-dot-medical-service-plot", component_property = "figure"),
 
         # Trend by Ward
         Output(component_id = "dASC-ward-plot", component_property = "figure"),
+        Output(component_id = "total-dASC-ward-plot", component_property = "figure"),
         Output(component_id = "total-dot-ward-plot", component_property = "figure"),
         Output(component_id = "total-ddd-ward-plot", component_property = "figure"),
         Output(component_id = "avg-dot-ward-plot", component_property = "figure"),
 
         # Trend by Doctor
         Output(component_id = "dASC-doctor-plot", component_property = "figure"),
+        Output(component_id = "total-dASC-doctor-plot", component_property = "figure"),
         Output(component_id = "total-dot-doctor-plot", component_property = "figure"),
         Output(component_id = "total-ddd-doctor-plot", component_property = "figure"),
         Output(component_id = "avg-dot-doctor-plot", component_property = "figure"),
 
         # Trend by AMS Indication
         Output(component_id = "dASC-ams-indication-plot", component_property = "figure"),
+        Output(component_id = "total-dASC-ams-indication-plot", component_property = "figure"),
         Output(component_id = "total-dot-ams-indication-plot", component_property = "figure"),
         Output(component_id = "total-ddd-ams-indication-plot", component_property = "figure"),
         Output(component_id = "avg-dot-ams-indication-plot", component_property = "figure"),
@@ -704,46 +744,56 @@ def update_plot(
 
     # Trend Plot By Order Generic
     mean_dASC_by_order_generic_trend_plot,  \
+    total_dASC_by_order_generic_trend_plot, \
     total_DOT_by_order_generic_trend_plot, \
     total_DDD_by_order_generic_trend_plot, \
     avg_dot_by_order_generic_trend_plot = create_trend_plots_by_category(df_copy, 'ORDER_GENERIC', 'Order Generic')
 
     # Trend Plot By Medical Service
     mean_dASC_by_medical_service_trend_plot,  \
+    total_dASC_by_medical_service_trend_plot, \
     total_DOT_by_medical_service_trend_plot, \
     total_DDD_by_medical_service_trend_plot, \
     avg_dot_by_medical_service_trend_plot = create_trend_plots_by_category(df_copy, 'MEDICAL_SERVICE', 'Medical Service')
 
     # Trend Plot By Ward
     mean_dASC_by_ward_trend_plot,  \
+    total_dASC_by_ward_trend_plot, \
     total_DOT_by_ward_trend_plot, \
     total_DDD_by_ward_trend_plot, \
     avg_dot_by_ward_trend_plot = create_trend_plots_by_category(df_copy, 'WARD', 'Ward')
 
     # Trend Plot By Ward
     mean_dASC_by_doctor_trend_plot,  \
+    total_dASC_by_doctor_trend_plot, \
     total_DOT_by_doctor_trend_plot, \
     total_DDD_by_doctor_trend_plot, \
     avg_dot_by_doctor_trend_plot = create_trend_plots_by_category(df_copy, 'DOCTOR', 'Doctor')
 
     # Trend Plot By AMS Indication
     mean_dASC_by_ams_indication_trend_plot,  \
+    total_dASC_by_ams_indication_trend_plot, \
     total_DOT_by_ams_indication_trend_plot, \
     total_DDD_by_ams_indication_trend_plot, \
     avg_dot_by_ams_indication_trend_plot = create_trend_plots_by_category(df_copy, 'AMS_INDICATION', 'AMS Indication')
 
 
     return  string_prefix, start_date_text, end_date_text,\
-            mean_dASC_by_order_generic_trend_plot, total_DOT_by_order_generic_trend_plot, \
-            total_DDD_by_order_generic_trend_plot, avg_dot_by_order_generic_trend_plot, \
-            mean_dASC_by_medical_service_trend_plot, total_DOT_by_medical_service_trend_plot, \
-            total_DDD_by_medical_service_trend_plot, avg_dot_by_medical_service_trend_plot, \
-            mean_dASC_by_ward_trend_plot, total_DOT_by_ward_trend_plot, \
-            total_DDD_by_ward_trend_plot, avg_dot_by_ward_trend_plot, \
-            mean_dASC_by_doctor_trend_plot, total_DOT_by_doctor_trend_plot, \
-            total_DDD_by_doctor_trend_plot, avg_dot_by_doctor_trend_plot, \
-            mean_dASC_by_ams_indication_trend_plot, total_DOT_by_ams_indication_trend_plot, \
-            total_DDD_by_ams_indication_trend_plot, avg_dot_by_ams_indication_trend_plot, \
+            mean_dASC_by_order_generic_trend_plot, total_dASC_by_order_generic_trend_plot, \
+            total_DOT_by_order_generic_trend_plot, total_DDD_by_order_generic_trend_plot, \
+            avg_dot_by_order_generic_trend_plot, \
+            mean_dASC_by_medical_service_trend_plot, total_dASC_by_medical_service_trend_plot, \
+            total_DOT_by_medical_service_trend_plot, total_DDD_by_medical_service_trend_plot, \
+            avg_dot_by_medical_service_trend_plot, \
+            mean_dASC_by_ward_trend_plot, total_dASC_by_ward_trend_plot, \
+            total_DOT_by_ward_trend_plot, total_DDD_by_ward_trend_plot, \
+            avg_dot_by_ward_trend_plot, \
+            mean_dASC_by_doctor_trend_plot, total_dASC_by_doctor_trend_plot,\
+            total_DOT_by_doctor_trend_plot, total_DDD_by_doctor_trend_plot, \
+            avg_dot_by_doctor_trend_plot, \
+            mean_dASC_by_ams_indication_trend_plot, total_dASC_by_ams_indication_trend_plot,\
+            total_DOT_by_ams_indication_trend_plot, total_DDD_by_ams_indication_trend_plot,\
+            avg_dot_by_ams_indication_trend_plot, \
             download_val
 
 
@@ -776,6 +826,7 @@ def update_datatable_trends(show_all_button, start_date, end_date, value):
         'AMS_INDICATION': 'AMS Indication',
         'ORDER_MONTH_YEAR': 'Order Month Year',
         'MEAN_dASC': 'Average dASC',
+        'TOTAL_dASC': 'Total dASC',
         'TOTAL_DOT': 'Total DOT',
         'TOTAL_DDD': 'Total DDD',
         'AVG_DOT': 'Average DOT'
