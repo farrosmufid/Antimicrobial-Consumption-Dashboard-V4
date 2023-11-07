@@ -33,13 +33,13 @@ def read_and_transform_agg_model():
     df.rename(columns={'LOCATION_OF_PATIENT_AT_THE_TIME_OF_ORDER': 'WARD'}, inplace=True)
     df.rename(columns={'ATTENDING_MEDICAL_OFFICER': 'DOCTOR'}, inplace=True)
     df.rename(columns={'total_DDD': 'TOTAL_DDD'}, inplace=True)
-    df.rename(columns={'total_dosage': 'TOTAL_DOSAGE'}, inplace=True)
+    df.rename(columns={'daily_dosage': 'DAILY_DOSAGE'}, inplace=True)
     df.rename(columns={'ORDER_PLACED_DATE': 'ORDER_DATE'}, inplace=True)
     df.rename(columns={'DAYS_OF_THERAPY': 'TOTAL_DOT'}, inplace=True)
 
     df['DOCTOR'] = df['DOCTOR'].str.replace(r'\s*\([^)]*\)$', '', regex=True) # remove (MO)(SMO)
 
-    filtered_df = df.loc[:, ['MRN', 'ORDER_DATE', 'ORDER_STATUS','ORDER_GENERIC','MEDICAL_SERVICE','WARD','AMS_INDICATION','DOCTOR','TOTAL_DDD','TOTAL_DOSAGE','TOTAL_DOT', 'AGE', 'ACTUAL_WEIGHT', 'dASC', 'PATIENT_NAME']] # select relevant attributes only
+    filtered_df = df.loc[:, ['MRN', 'ORDER_DATE', 'ORDER_STATUS','ORDER_GENERIC','MEDICAL_SERVICE','WARD','AMS_INDICATION','DOCTOR','TOTAL_DDD','DAILY_DOSAGE','TOTAL_DOT', 'AGE', 'ACTUAL_WEIGHT', 'dASC', 'PATIENT_NAME']] # select relevant attributes only
 
     filtered_df['ORDER_DATE'] = pd.to_datetime(filtered_df['ORDER_DATE'], format = ORDER_DATE_DATE_FORMAT )
     

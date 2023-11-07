@@ -30,13 +30,13 @@ def read_and_transform_agg_model():
     df.rename(columns={'LOCATION_OF_PATIENT_AT_THE_TIME_OF_ORDER': 'WARD'}, inplace=True)
     df.rename(columns={'ATTENDING_MEDICAL_OFFICER': 'DOCTOR'}, inplace=True)
     df.rename(columns={'total_DDD': 'TOTAL_DDD'}, inplace=True)
-    df.rename(columns={'total_dosage': 'TOTAL_DOSAGE'}, inplace=True)
+    df.rename(columns={'daily_dosage': 'DAILY_DOSAGE'}, inplace=True)
     df.rename(columns={'ORDER_PLACED_DATE': 'ORDER_DATE'}, inplace=True)
     df.rename(columns={'DAYS_OF_THERAPY': 'TOTAL_DOT'}, inplace=True)
 
     df['DOCTOR'] = df['DOCTOR'].str.replace(r'\s*\([^)]*\)$', '', regex=True) # remove (MO)(SMO)
 
-    filtered_df = df.loc[:, ['MRN', 'ORDER_DATE', 'ORDER_STATUS','ORDER_GENERIC','MEDICAL_SERVICE','WARD','AMS_INDICATION','DOCTOR','TOTAL_DDD','TOTAL_DOSAGE','TOTAL_DOT', 'AGE', 'ACTUAL_WEIGHT', 'dASC', 'EGFR', 'FREQUENCY', 'DOSE', 'PATIENT_NAME']] # select relevant attributes only
+    filtered_df = df.loc[:, ['MRN', 'ORDER_DATE', 'ORDER_STATUS','ORDER_GENERIC','MEDICAL_SERVICE','WARD','AMS_INDICATION','DOCTOR','TOTAL_DDD','DAILY_DOSAGE','TOTAL_DOT', 'AGE', 'ACTUAL_WEIGHT', 'dASC', 'EGFR', 'FREQUENCY', 'DOSE', 'PATIENT_NAME']] # select relevant attributes only
 
     filtered_df['ORDER_DATE'] = pd.to_datetime(filtered_df['ORDER_DATE'], format = ORDER_DATE_DATE_FORMAT)
     
@@ -916,7 +916,7 @@ def update_plot(
     egfr_dosef24_copy = egfr_dosef24_copy[egfr_dosef24_copy['ORDER_GENERIC'] == generic1T_value]
     
     # Create df
-    awDose_scatter_df = awDose_scatter_df.dropna(subset=['AGE','ACTUAL_WEIGHT','TOTAL_DOSAGE'])
+    awDose_scatter_df = awDose_scatter_df.dropna(subset=['AGE','ACTUAL_WEIGHT','DAILY_DOSAGE'])
 
     # Download Age, Weight, Exact Dose Scatter Plot Data
     download_age_weight_dose_scatter_plot_val = dash.no_update
@@ -1031,9 +1031,9 @@ def update_plot(
 
     # Plot Age, Weight, Dose Scatter
     if medi_bool and amsindi_bool:
-        awDose_scatter = px.scatter_3d(awDose_scatter_df, x = 'AGE', y = 'ACTUAL_WEIGHT', z = 'TOTAL_DOSAGE', 
+        awDose_scatter = px.scatter_3d(awDose_scatter_df, x = 'AGE', y = 'ACTUAL_WEIGHT', z = 'DAILY_DOSAGE', 
                                        color = 'MEDICAL_SERVICE', symbol = 'AMS_INDICATION',title = 'Age, Weight, and Exact Dose 3D Scatter Plot', 
-                                       labels = {'AGE': 'Age','ACTUAL_WEIGHT': 'Weight','TOTAL_DOSAGE': 'Total Dosage',
+                                       labels = {'AGE': 'Age','ACTUAL_WEIGHT': 'Weight','DAILY_DOSAGE': 'Daily Dosage',
                                                  'MEDICAL_SERVICE': 'Medical Service','AMS_INDICATION': 'AMS Indication'},
                                                  hover_name = "PATIENT_NAME", hover_data = ["MRN", "MEDICAL_SERVICE", "AMS_INDICATION"])
         
@@ -1043,15 +1043,15 @@ def update_plot(
             "<br>" + # New line
             "Age: %{x}<br>" + # Age
             "Weight: %{y}<br>" + # Weight
-            "Total Dosage: %{z}<br>" + # Total Dosage
+            "Daily Dosage: %{z}<br>" + # Daily Dosage
             "Medical Service: %{customdata[1]}<br>" + # Medical Service
             "AMS Indication: %{customdata[2]}"
         )
 
     elif medi_bool:
-        awDose_scatter = px.scatter_3d(awDose_scatter_df, x='AGE', y = 'ACTUAL_WEIGHT', z = 'TOTAL_DOSAGE',
+        awDose_scatter = px.scatter_3d(awDose_scatter_df, x='AGE', y = 'ACTUAL_WEIGHT', z = 'DAILY_DOSAGE',
                                        color = 'MEDICAL_SERVICE', title = 'Age, Weight, and Exact Dosage 3D Scatter Plot',
-                                       labels = {'AGE': 'Age', 'ACTUAL_WEIGHT': 'Weight', 'TOTAL_DOSAGE': 'Total Dosage',
+                                       labels = {'AGE': 'Age', 'ACTUAL_WEIGHT': 'Weight', 'DAILY_DOSAGE': 'Daily Dosage',
                                                  'MEDICAL_SERVICE': 'Medical Service','AMS_INDICATION': 'AMS Indication'},
                                                  hover_name = "PATIENT_NAME", hover_data = ["MRN", "MEDICAL_SERVICE", "AMS_INDICATION"])
         
@@ -1061,15 +1061,15 @@ def update_plot(
             "<br>" + # New line
             "Age: %{x}<br>" + # Age
             "Weight: %{y}<br>" + # Weight
-            "Total Dosage: %{z}<br>" + # Total Dosage
+            "Daily Dosage: %{z}<br>" + # Daily Dosage
             "Medical Service: %{customdata[1]}<br>" + # Medical Service
             "AMS Indication: %{customdata[2]}"
         )
 
     elif amsindi_bool:
-        awDose_scatter = px.scatter_3d(awDose_scatter_df, x = 'AGE', y = 'ACTUAL_WEIGHT', z = 'TOTAL_DOSAGE',
+        awDose_scatter = px.scatter_3d(awDose_scatter_df, x = 'AGE', y = 'ACTUAL_WEIGHT', z = 'DAILY_DOSAGE',
                                        color = 'AMS_INDICATION',title = 'Age, Weight, and Exact Dose 3D Scatter Plot', 
-                                       labels = {'AGE': 'Age','ACTUAL_WEIGHT': 'Weight','TOTAL_DOSAGE': 'Total Dosage',
+                                       labels = {'AGE': 'Age','ACTUAL_WEIGHT': 'Weight','DAILY_DOSAGE': 'Daily Dosage',
                                        'MEDICAL_SERVICE': 'Medical Service','AMS_INDICATION': 'AMS Indication'},
                                        hover_name = "PATIENT_NAME", hover_data = ["MRN", "MEDICAL_SERVICE", "AMS_INDICATION"])
         
@@ -1079,15 +1079,15 @@ def update_plot(
             "<br>" + # New line
             "Age: %{x}<br>" + # Age
             "Weight: %{y}<br>" + # Weight
-            "Total Dosage: %{z}<br>" + # Total Dosage
+            "Daily Dosage: %{z}<br>" + # Daily Dosage
             "Medical Service: %{customdata[1]}<br>" + # Medical Service
             "AMS Indication: %{customdata[2]}"
         )
 
     else:
-        awDose_scatter = px.scatter_3d(awDose_scatter_df, x = 'AGE', y = 'ACTUAL_WEIGHT', z = 'TOTAL_DOSAGE',
+        awDose_scatter = px.scatter_3d(awDose_scatter_df, x = 'AGE', y = 'ACTUAL_WEIGHT', z = 'DAILY_DOSAGE',
                                        title = 'Age, Weight, and Exact Dose 3D Scatter Plot', 
-                                       labels = {'AGE': 'Age','ACTUAL_WEIGHT': 'Weight','TOTAL_DOSAGE': 'Total Dosage',
+                                       labels = {'AGE': 'Age','ACTUAL_WEIGHT': 'Weight','DAILY_DOSAGE': 'Daily Dosage',
                                        'MEDICAL_SERVICE': 'Medical Service','AMS_INDICATION': 'AMS Indication'}, 
                                        hover_name = "PATIENT_NAME", hover_data = ["MRN", "MEDICAL_SERVICE", "AMS_INDICATION"])
         
@@ -1097,7 +1097,7 @@ def update_plot(
             "<br>" + # New line
             "Age: %{x}<br>" + # Age
             "Weight: %{y}<br>" + # Weight
-            "Total Dosage: %{z}<br>" + # Total Dosage
+            "Daily Dosage: %{z}<br>" + # Daily Dosage
             "Medical Service: %{customdata[1]}<br>" + # Medical Service
             "AMS Indication: %{customdata[2]}"
         )

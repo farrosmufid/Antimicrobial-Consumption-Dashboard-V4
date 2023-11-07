@@ -207,7 +207,7 @@ def transform_ddd(Fmonth):
     StartStop['RX_ROUTE'] = StartStop['RX_ROUTE'].replace(route_dict)
     
     StartStop['total_DDD']= None
-    StartStop['total_dosage']=None
+    StartStop['daily_dosage']=None
     # test=[]
     for index, row in StartStop.iterrows():
         generic=row['ORDER_GENERIC'].lower()
@@ -216,7 +216,7 @@ def transform_ddd(Fmonth):
         unit=row['DOSE_UNIT']
         freq = row['TIME_PER_DAY']
         length=row['DOT_per_ORDER']
-        StartStop.at[index,'total_dosage']=exact_amt*freq*length
+        StartStop.at[index,'daily_dosage']=exact_amt*freq
         # Exclude trimethoprim-sulfamethoxazole because it doesn't have DDD metric but will be matched in Line 234 if statement.
         if generic != "trimethoprim-sulfamethoxazole": 
             if generic in DDD_lst:
@@ -227,7 +227,6 @@ def transform_ddd(Fmonth):
         #             if len(filter2DDD['DDD']) >1:
         #                 test.append(filter2DDD['name'].unique())
                     typeDDD=float(filter2DDD['DDD'])
-                    StartStop.at[index,'DDD_per_day']=exact_amt*freq/typeDDD
                     StartStop.at[index, 'total_DDD']=exact_amt*freq*length/typeDDD
             else:
                 for item in DDD_lst:
@@ -237,15 +236,14 @@ def transform_ddd(Fmonth):
                         filter2DDD=filter1DDD[filter1DDD['U']==unit]
                         if not filter2DDD.empty:
                             typeDDD=float(filter2DDD['DDD'])
-                            StartStop.at[index,'DDD_per_day']=exact_amt*freq/typeDDD
                             StartStop.at[index, 'total_DDD']=exact_amt*freq*length/typeDDD
     Fmonth['total_DDD']=None
-    Fmonth['total_dosage']=None
+    Fmonth['daily_dosage']=None
     Fmonth['DOSE_UNIT']=None
     Fmonth['dosage_f24']=None
     for index, row in StartStop.iterrows():
-        if not pd.isna(row['total_dosage']):
-            Fmonth.at[index, 'total_dosage']=row['total_dosage']
+        if not pd.isna(row['daily_dosage']):
+            Fmonth.at[index, 'daily_dosage']=row['daily_dosage']
         if not pd.isna(row['total_DDD']):
             Fmonth.at[index, 'total_DDD']=row['total_DDD']
     for index, row in dosage_f24.iterrows():
