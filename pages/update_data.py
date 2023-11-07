@@ -111,16 +111,20 @@ def read_and_transform_resistance_data_model():
     df.reset_index(drop = True, inplace = True)
     df = df[(df['INTERP'] == 'I') | (df['INTERP'] == 'R') | (df['INTERP'] == 'S') | (df['INTERP'] == 'S-DD') | (df['INTERP'] == 'S-IE')] # select only values equal to I, R, S, S-DD, S-IE
     df['ADMITTING_MO'] = df['ADMITTING_MO'].str.replace(r'\s?\(.*\)', '', regex=True) # remove medical officer and specialist medical officer
-    condition = (~df['ORDERABLE'].isin(['Blood Culture', 'Culture Urine']))
-    replacement = 'Culture Other'
-    df['ORDERABLE'] = np.where(condition, replacement, df['ORDERABLE'])
+    # condition = (~df['ORDERABLE'].isin(['Blood Culture', 'Culture Urine']))
+    # replacement = 'Culture Other'
+    # df['ORDERABLE'] = np.where(condition, replacement, df['ORDERABLE'])
     df = df.drop_duplicates(keep='first')
 
     print("finished cleaning ...")
 
     print("start pivot ...")
 
-    pivot_df = df.pivot_table(index=['MRN','DATE_OF_BIRTH','ACCESSION','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
+    # Pivot does not work if there are null values in the row
+    
+    df.fillna({'MRN': 'N/A','DATE_OF_BIRTH': 'N/A','ANTIBIOTIC': 'N/A', 'ORGANISM_NAME': 'N/A', 'ORDERABLE': 'N/A', 'NURSE_LOC': 'N/A', 'ADMITTING_MO': 'N/A', 'MED_SERVICE': 'N/A'}, inplace=True)
+
+    pivot_df = df.pivot_table(index=['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
 
     # Reset the index if you want 'MRN' and 'ORGANISM_NAME' to be regular columns
     pivot_df.reset_index(inplace=True)
@@ -134,9 +138,10 @@ def read_and_transform_resistance_data_model():
     pivot_df.to_csv("./resistance_data_clean/susceptibility_download.csv", index = False)
 
     print("finished pivot ...")
-    
-    df.fillna({'MRN': -1,'ANTIBIOTIC': -1, 'ORGANISM_NAME': -1, 'ORDERABLE': -1, 'NURSE_LOC': -1, 'ADMITTING_MO': -1, 'MED_SERVICE': -1}, inplace=True) #Replace nulls to ensure nothing dropped
 
+    df = df.drop('ACCESSION', axis=1)
+    df = df.drop_duplicates(keep='first')
+    
     print("start summing the subsceptible, resistance, and intermediate count ...")
     # Sum the subsceptible, resistance, intermediate count
     S = df.groupby(by = ['MRN','ANTIBIOTIC','ORGANISM_NAME','ORDERABLE','NURSE_LOC','ADMITTING_MO','MED_SERVICE','COLLECT_DT_TM'])['INTERP'].apply(lambda x: (x == 'S').sum()).reset_index().rename(columns = {'INTERP':'Count_S'})
