@@ -3,14 +3,20 @@
 ## 1. Update Page
 ![image](https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/93821446/cb0d1dac-5abc-4c3c-a869-e4337479d765)
 
-### Description
-The update page contains 2 areas to upload antibiotic orders data and susceptibility results data. Upload raw data in the relevant boxes for cleaning and transformation. If the file is not in the accepted format, it will throw an error. Files uploaded will have their minimum and maximum date listed. If you've uploaded a file that you wish to remove, simply go to the orders_data_dump folder and delete that file. Then proceed to click "Refresh order data" or "Refresh susceptibility data" to reload the cleaning and transformation process. Click "Download cleaned data csv" to get a cleaned copy of your raw data.
+**Details**
+- The update page contains 2 areas to upload antibiotic orders data and susceptibility results data.
+- Upload raw data in the relevant boxes for cleaning and transformation.
+- If the file is not in the accepted format, it will throw an error.
+- Files uploaded will have their minimum and maximum date listed.
+- If you've uploaded a file that you wish to remove, simply go to the orders_data_dump folder and delete that file.
+- Then proceed to click "Refresh order data" or "Refresh susceptibility data" to reload the cleaning and transformation process.
+- Click "Download cleaned data csv" to get a cleaned copy of your raw data.
 
 ## 2. High Level Trends
 | Chart | Description | Visualisation |
 | :-: | - | - |
-| **Tabular Filters** | The date filter on top, which is specific for the table below, allows users to decide the period of interest. The button on the right allows you to remove the filter and show the full date range of stats. The five options on top of table allows users to check DOT, DDD and dASC stats specific to each medical service, ward, doctor, and AMS indication. ||
-| **Chart Filters** | These filters have overall control of high-level visualisations. These filters give users the ability to specify the type of order status, order generic, medical service, ward, doctor and AMS indication that they want to look at. We have 5 tabs and each tab allows users to see the trends of average dASC, total DOT, total DDD and average DOT against time. ||
+| **Top Trend Month Year** | The date filter at the top is specific for the tabular view.  Users may filter to view the time period of their choice. The button on the right allows you to remove the filter and show the full date range of stats. The five options on top of table allows users to Average dASC, Total DOT, Total DDD and Average DOT insights specific to each medical service, ward, doctor, and AMS indication. | ![image](https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/93821446/04bf3a60-d6de-4c93-8656-4b0b699ba315)|
+| **Antimicrobial Consumption Trends** | These filters have overall control of the high-level trend visualisations. These filters give users the ability to specify the type of order status, order generic, medical service, ward, doctor and AMS indication that they want to look at. We have 5 tabs and each tab allows users to see the trends of Average dASC, Total DOT, Total DDD and Average DOT across time. |![image](https://github.com/farrosmufid/Antimicrobial-Consumption-Dashboard-V4/assets/93821446/1d7f5f43-4858-4e00-b150-5e2050bd39b2)|
 
 ## 3. Deep Dive
 | Chart | Description | Visualisation |
