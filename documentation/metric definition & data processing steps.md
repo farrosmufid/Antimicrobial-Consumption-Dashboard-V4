@@ -38,17 +38,15 @@
 ### Defined Daily Dose (DDD) Calculation Process
 Total_DDD = DOSE x FREQUENCY x (START_DTTM - STOP_DTTM + 1) / DDD_metric (match ORDER_GENERIC and RX_ROUTE).
 
-1. If DOSE is not valid, extract information from ORDER_NAME and VOLUME_DOSE. Use ORDER_NAME x VOLUME_DOSE as DOSE.
-2. Exclude prescription orders with topical routes that cannot be quantified. <br>VOLUME_DOSE = ‘drop’, ‘application’, and RX_ROUTE = ‘EYE’, ‘NOSTRIL’. 
-3. Exclude rows with conflicting information in ORDER_NAME and VOLUME_DOSE. <br>e.g. ‘tablets’ in ORDER_NAME but ‘mL’ in VOLUME_DOSE. 
-4. Go through each row and check for validity of the DOSE value.
-5. If DOSE is valid, convert DOSE value with only ‘mg’ and ‘unit’.
-6. If DOSE is not valid, extract information from ORDER_NAME and VOLUME_DOSE to use ORDER_NAME x VOLUME_DOSE as new DOSE. 
-7. Convert FREQUENCY into the number of times the prescribed dosage is taken per day. 
-8. Retain rows that have a valid STOP_DTTM so that the number of days each order lasts for can be known. 
-9. Convert RX_ROUTE into three categories to match with the route type with WHO DDD information: O as Oral, P as Intravenous, and Inhal.solution as Inhalation. 
-10. Go through each row and calculate the total_dosage. Match the ORDER_GENERIC and RX_ROUTE with the values from the WHO DDD metric table.
-11. Calculate Total_DDD.
+1. Exclude prescription orders with topical routes that cannot be quantified. <br>VOLUME_DOSE = ‘drop’, ‘application’, and RX_ROUTE = ‘EYE’, ‘NOSTRIL’. 
+2. Exclude rows with conflicting information in ORDER_NAME and VOLUME_DOSE. <br>e.g. ‘tablets’ in ORDER_NAME but ‘mL’ in VOLUME_DOSE. 
+3. Go through each row and check for validity of the DOSE value.
+4. If DOSE is valid, convert DOSE value with only ‘mg’ and ‘unit’.
+5. If DOSE is not valid, extract information from ORDER_NAME and VOLUME_DOSE to use ORDER_NAME x VOLUME_DOSE as new DOSE. 
+6. Retain rows that have a valid STOP_DTTM so that the number of days each order lasts for can be known. 
+7. Convert RX_ROUTE into three categories to match with the route type with WHO DDD information: O as Oral, P as Intravenous, and Inhal.solution as Inhalation. 
+8. Go through each row and calculate the total_dosage. Match the ORDER_GENERIC and RX_ROUTE with the values from the WHO DDD metric table.
+9. Calculate Total_DDD.
 
 If the below fields are missing values, the DDD metric will not be derived.
 1. (Quantifiable) DOSE / ORDER_NAME + VOLUME_DOSE
