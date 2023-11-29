@@ -1111,7 +1111,18 @@ def update_plot(
         labels = {
             'EGFR': 'EGFR',
             'FIRST 24hr DOSE': 'First 24hr Dose'
-        })
+        },
+        hover_name = "PATIENT_NAME",
+        hover_data = ["MRN"]
+    )
+
+    egfrDose_scatter.update_traces(
+        hovertemplate = "<b>%{hovertext}</b><br>" + # PATIENT NAME in bold
+        "<b>MRN: %{customdata[0]}</b><br>" + # MRN in bold
+        "<br>" + # New line
+        "EGFR: %{x}<br>" + # EGFR
+        "First 24hr Dose: %{y}" # First 24h dose
+    )
 
     return string_prefix, start_date_text, end_date_text, cross_filter_scatter_plot, awDose_scatter, egfrDose_scatter, \
             length_of_stay_bar, length_of_stay_df.to_dict('records'), \
