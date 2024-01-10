@@ -105,8 +105,6 @@ def read_and_transform_resistance_data_model():
     df['COLLECT_DT_TM'] = pd.to_datetime(df['COLLECT_DT_TM'], format = '%d/%m/%Y %H:%M').dt.date # convert to datetime format
     df['COMPLETE_DT_TM'] = pd.to_datetime(df['COMPLETE_DT_TM'], format = '%d/%m/%Y %H:%M').dt.date # convert to datetime format
     df = df[df['CLIENT'] == 'Westmead Hospital'] # select only records from westmead hospital
-    columns_to_keep = ['ORDERABLE','ACCESSION','MRN','DATE_OF_BIRTH','COLLECT_DT_TM','ORGANISM_NAME','CLIENT','NURSE_LOC','ADMITTING_MO','MED_SERVICE','ANTIBIOTIC','INTERP']
-    df = df[columns_to_keep] # apply filter selection to df
     df.dropna(subset = ['INTERP'], inplace = True) # drop missing values in INTERP and reset index
     df.reset_index(drop = True, inplace = True)
     df = df[(df['INTERP'] == 'I') | (df['INTERP'] == 'R') | (df['INTERP'] == 'S') | (df['INTERP'] == 'S-DD') | (df['INTERP'] == 'S-IE')] # select only values equal to I, R, S, S-DD, S-IE
@@ -121,10 +119,11 @@ def read_and_transform_resistance_data_model():
     print("start pivot ...")
 
     # Pivot does not work if there are null values in the row
-    
-    df.fillna({'MRN': 'N/A','DATE_OF_BIRTH': 'N/A','ANTIBIOTIC': 'N/A', 'ORGANISM_NAME': 'N/A', 'ORDERABLE': 'N/A', 'NURSE_LOC': 'N/A', 'ADMITTING_MO': 'N/A', 'MED_SERVICE': 'N/A'}, inplace=True)
 
-    pivot_df = df.pivot_table(index=['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
+    # df.fillna({'MRN': 'N/A','DATE_OF_BIRTH': 'N/A','ANTIBIOTIC': 'N/A', 'ORGANISM_NAME': 'N/A', 'ORDERABLE': 'N/A', 'NURSE_LOC': 'N/A', 'ADMITTING_MO': 'N/A', 'MED_SERVICE': 'N/A'}, inplace=True)
+    df.fillna(-1, inplace=True)
+    # pivot_df = df.pivot_table(index=['MRN','DATE_OF_BIRTH','ACCESSION','COLLECT_DT_TM','ORDERABLE','MED_SERVICE','NURSE_LOC','ADMITTING_MO','ORGANISM_NAME'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
+    pivot_df = df.pivot_table(index=['ACCESSION', 'SOURCE', 'BODY_SITE', 'ORDERABLE', 'PATIENT_NAME', 'SEX', 'MRN', 'DATE_OF_BIRTH', 'ADMIT_DT_TM', 'COLLECT_DT_TM', 'COMPLETE_DT_TM', 'NOSOCOMIAL_IND', 'ORGANISM', 'ORGANISM_NAME', 'TESTING_LAB', 'CLIENT', 'NURSE_LOC', 'ADMITTING_MO', 'MED_SERVICE', 'METHOD', 'MIC', 'ZONE'], columns='ANTIBIOTIC', values='INTERP', aggfunc='first')
 
     # Reset the index if you want 'MRN' and 'ORGANISM_NAME' to be regular columns
     pivot_df.reset_index(inplace=True)
@@ -139,9 +138,14 @@ def read_and_transform_resistance_data_model():
 
     print("finished pivot ...")
 
+    columns_to_keep = ['ORDERABLE','ACCESSION','MRN','DATE_OF_BIRTH','COLLECT_DT_TM','ORGANISM_NAME','CLIENT','NURSE_LOC','ADMITTING_MO','MED_SERVICE','ANTIBIOTIC','INTERP']
+    df = df[columns_to_keep] # apply filter selection to df
+
+
     df = df.drop('ACCESSION', axis=1)
     df = df.drop_duplicates(keep='first')
-    
+
+
     print("start summing the subsceptible, resistance, and intermediate count ...")
     # Sum the subsceptible, resistance, intermediate count
     S = df.groupby(by = ['MRN','ANTIBIOTIC','ORGANISM_NAME','ORDERABLE','NURSE_LOC','ADMITTING_MO','MED_SERVICE','COLLECT_DT_TM'])['INTERP'].apply(lambda x: (x == 'S').sum()).reset_index().rename(columns = {'INTERP':'Count_S'})
